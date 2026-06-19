@@ -79,8 +79,13 @@ is how the weapon picker filters.
 
 ## Deployment
 
-Static build deployed to **Vercel** (auto-detected Vite app, output `dist`). No env
-vars, no server. See [README.md](README.md) for the dashboard and CLI flows.
+Static build deployed to **GitHub Pages** via the
+[deploy workflow](.github/workflows/deploy.yml): every push to `main` runs
+`npm run build` and publishes `dist`. No env vars, no server. The repo's Pages source
+must be set to **GitHub Actions** (Settings → Pages). Because Pages serves a project
+site under a subpath, `vite.config.ts` sets `base: "/wuwa-planner/"` — keep that in
+sync with the repo name. The app has no client-side router, so no `404.html` SPA
+fallback is needed.
 
 ## Releasing / changelog
 

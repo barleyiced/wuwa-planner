@@ -41,7 +41,8 @@ Initial release.
 - **Live game data** — resonator/weapon catalog is fetched at runtime and the latest
   game version is resolved from the site manifest (falls back to a pinned version),
   then cached locally.
-- **Deployment** — static SPA (Vite + React + TypeScript + Tailwind), ready for Vercel.
+- **Deployment** — static SPA (Vite + React + TypeScript + Tailwind), deployed to
+  GitHub Pages at https://barleyiced.github.io/wuwa-planner/.
 
 [Unreleased]: https://example.com/compare/v1.0.0...HEAD
 [1.0.0]: https://example.com/releases/tag/v1.0.0
