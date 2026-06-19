@@ -9,12 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Drag-and-drop team reordering** — grab a team card by its handle (⠿) to drag it
+  into a new position. The existing ↑/↓ buttons remain as a keyboard/touch fallback.
 - **Vigor system** — resonators can now only be placed in as many teams as they have
   Vigor (1 by default; 2 for dedicated healers: Baizhi, Verina, Shorekeeper, Buling,
   Mornye). The resonator picker shows Vigor dots on each card and disables (dims)
   resonators who are out of Vigor or already placed in the team being edited. All
   Rover variants share a single Vigor pool, so fielding any Rover dims every other
-  Rover (you can still swap one Rover element for another in the same slot).
+  Rover (you can still swap one Rover element for another in the same slot). Team
+  cards flag any resonator placed in more teams than its Vigor allows (e.g. from an
+  imported plan) with an amber **over Vigor** warning.
 - **Larger resonator portraits** — the resonator picker now shows the tall in-game
   "role pile" portraits (with the name and rarity over a gradient) instead of small
   square head icons. Portraits come from `static.nanoka.cc` (new `background` field;
@@ -34,6 +38,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **SEO & social metadata** — descriptive title/description/keywords, canonical URL,
   Open Graph and Twitter Card tags, `WebApplication` JSON-LD structured data, a
   generated `og-image.svg`, plus `robots.txt` and `sitemap.xml`.
+
+### Removed
+
+- **Duplicate-team button** — removed. With the Vigor system, cloning a team's
+  resonators wholesale instantly puts every 1-Vigor resonator in two teams at once,
+  which contradicts the planner's core constraint. Add/rename/reorder/delete remain.
 
 ### Fixed
 

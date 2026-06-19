@@ -11,10 +11,13 @@ const RELEASES: Release[] = [
     version: "Latest",
     tag: "new",
     changes: [
+      "Drag teams by the ⠿ handle to reorder them (↑/↓ buttons still work too).",
       "Vigor system — Resonators can join only as many teams as they have Vigor.",
+      "Weapon allocation no longer double-counts a Resonator shared across teams.",
       "Larger in-game Resonator portraits in the picker.",
       "In-app “How to use” guide.",
       "Real element and weapon-type icons throughout.",
+      "Removed the duplicate-team button (it conflicted with Vigor limits).",
     ],
   },
   {

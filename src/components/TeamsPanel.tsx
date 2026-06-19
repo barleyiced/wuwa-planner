@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { MAX_TEAMS, type PlanApi, type Team } from "../store";
-import { WEAPON_TYPES, elementOf, type GameData } from "../game";
+import { WEAPON_TYPES, elementOf, vigorGroupKey, vigorOf, type GameData } from "../game";
 import { CharIcon, WeaponIcon, WeaponTypeIcon } from "./Icon";
 import { CharacterPicker } from "./CharacterPicker";
 import { WeaponPicker } from "./WeaponPicker";
@@ -9,10 +9,46 @@ type Editing = { teamId: string; slot: number; mode: "char" | "weapon" } | null;
 
 export function TeamsPanel({ data, plan }: { data: GameData; plan: PlanApi }) {
   const [editing, setEditing] = useState<Editing>(null);
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [overIndex, setOverIndex] = useState<number | null>(null);
+
+  const endDrag = () => {
+    setDragId(null);
+    setOverIndex(null);
+  };
+
+  const dropOn = (index: number) => {
+    if (dragId) plan.reorderTeam(dragId, index);
+    endDrag();
+  };
 
   const editTeam = editing && plan.state.teams.find((t) => t.id === editing.teamId);
   const editSlot = editTeam ? editTeam.slots[editing!.slot] : null;
   const editChar = editSlot?.characterId ? data.characterById[editSlot.characterId] : null;
+
+  // Resonators placed in more teams than their Vigor allows. The picker prevents
+  // this for new picks, but imports (and 2-Vigor healers used a 3rd time) can
+  // still produce it, so flag any offenders on their team cards.
+  const overVigorIds = useMemo(() => {
+    const groupCount: Record<string, number> = {};
+    for (const t of plan.state.teams) {
+      for (const sl of t.slots) {
+        const c = sl.characterId ? data.characterById[sl.characterId] : null;
+        if (c) {
+          const k = vigorGroupKey(c);
+          groupCount[k] = (groupCount[k] ?? 0) + 1;
+        }
+      }
+    }
+    const over = new Set<string>();
+    for (const t of plan.state.teams) {
+      for (const sl of t.slots) {
+        const c = sl.characterId ? data.characterById[sl.characterId] : null;
+        if (c && groupCount[vigorGroupKey(c)] > vigorOf(c.id)) over.add(c.id);
+      }
+    }
+    return over;
+  }, [plan.state.teams, data]);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-5">
@@ -20,7 +56,8 @@ export function TeamsPanel({ data, plan }: { data: GameData; plan: PlanApi }) {
         <div>
           <h2 className="text-lg font-semibold">Teams</h2>
           <p className="text-xs text-slate-400">
-            {plan.state.teams.length} / {MAX_TEAMS} teams · weapons can't be shared beyond owned copies
+            {plan.state.teams.length} / {MAX_TEAMS} teams · drag a card by its handle to reorder ·
+            weapons can't be shared beyond owned copies
           </p>
         </div>
         <button
@@ -41,6 +78,13 @@ export function TeamsPanel({ data, plan }: { data: GameData; plan: PlanApi }) {
             count={plan.state.teams.length}
             data={data}
             plan={plan}
+            overVigorIds={overVigorIds}
+            isDragging={dragId === team.id}
+            isDropTarget={dragId != null && dragId !== team.id && overIndex === i}
+            onDragStart={() => setDragId(team.id)}
+            onDragEnterCard={() => dragId && setOverIndex(i)}
+            onDropCard={() => dropOn(i)}
+            onDragEndCard={endDrag}
             onEdit={(slot, mode) => setEditing({ teamId: team.id, slot, mode })}
           />
         ))}
@@ -89,6 +133,13 @@ function TeamCard({
   count,
   data,
   plan,
+  overVigorIds,
+  isDragging,
+  isDropTarget,
+  onDragStart,
+  onDragEnterCard,
+  onDropCard,
+  onDragEndCard,
   onEdit,
 }: {
   team: Team;
@@ -96,11 +147,58 @@ function TeamCard({
   count: number;
   data: GameData;
   plan: PlanApi;
+  overVigorIds: Set<string>;
+  isDragging: boolean;
+  isDropTarget: boolean;
+  onDragStart: () => void;
+  onDragEnterCard: () => void;
+  onDropCard: () => void;
+  onDragEndCard: () => void;
   onEdit: (slot: number, mode: "char" | "weapon") => void;
 }) {
+  // Only arm the native drag when the user grabs the handle, so the name input
+  // stays selectable/editable and the card body doesn't initiate a drag.
+  const [armed, setArmed] = useState(false);
+
+  const slotColors = team.slots.map((s) => {
+    const c = s.characterId ? data.characterById[s.characterId] : null;
+    return c ? elementOf(c.element).color : null;
+  });
+
   return (
-    <div className="rounded-2xl border border-[var(--color-edge)] bg-[var(--color-panel)] p-3">
+    <div
+      draggable={armed}
+      onDragStart={(e) => {
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", team.id);
+        onDragStart();
+      }}
+      onDragEnter={onDragEnterCard}
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={(e) => {
+        e.preventDefault();
+        onDropCard();
+      }}
+      onDragEnd={() => {
+        setArmed(false);
+        onDragEndCard();
+      }}
+      className={`rounded-2xl border bg-[var(--color-panel)] p-3 transition ${
+        isDropTarget
+          ? "border-sky-400 ring-2 ring-sky-400/60"
+          : "border-[var(--color-edge)]"
+      } ${isDragging ? "opacity-40" : ""}`}
+    >
       <div className="mb-2 flex items-center gap-2">
+        <button
+          title="Drag to reorder"
+          aria-label="Drag to reorder team"
+          onMouseDown={() => setArmed(true)}
+          onMouseUp={() => setArmed(false)}
+          className="flex h-7 w-6 cursor-grab items-center justify-center rounded-md text-slate-500 transition hover:bg-white/10 hover:text-white active:cursor-grabbing"
+        >
+          ⠿
+        </button>
         <input
           value={team.name}
           onChange={(e) => plan.renameTeam(team.id, e.target.value)}
@@ -117,17 +215,20 @@ function TeamCard({
           >
             ↓
           </IconBtn>
-          <IconBtn
-            title="Duplicate"
-            disabled={count >= MAX_TEAMS}
-            onClick={() => plan.duplicateTeam(team.id)}
-          >
-            ⧉
-          </IconBtn>
           <IconBtn title="Delete team" onClick={() => plan.removeTeam(team.id)} danger>
             ✕
           </IconBtn>
         </div>
+      </div>
+
+      <div className="mb-2 flex gap-1">
+        {slotColors.map((c, i) => (
+          <span
+            key={i}
+            className="h-1 flex-1 rounded-full"
+            style={{ background: c ?? "var(--color-edge)" }}
+          />
+        ))}
       </div>
 
       <div className="grid grid-cols-3 gap-2">
@@ -138,6 +239,7 @@ function TeamCard({
             plan={plan}
             characterId={slot.characterId}
             weaponId={slot.weaponId}
+            overVigor={slot.characterId ? overVigorIds.has(slot.characterId) : false}
             onEditChar={() => onEdit(i, "char")}
             onEditWeapon={() => onEdit(i, "weapon")}
             onClear={() => plan.clearSlot(team.id, i)}
@@ -153,6 +255,7 @@ function Slot({
   plan,
   characterId,
   weaponId,
+  overVigor,
   onEditChar,
   onEditWeapon,
   onClear,
@@ -161,6 +264,7 @@ function Slot({
   plan: PlanApi;
   characterId: string | null;
   weaponId: string | null;
+  overVigor: boolean;
   onEditChar: () => void;
   onEditWeapon: () => void;
   onClear: () => void;
@@ -183,7 +287,13 @@ function Slot({
 
   const el = elementOf(char.element);
   return (
-    <div className="group relative flex flex-col items-center gap-1.5 rounded-xl border border-[var(--color-edge)] bg-[var(--color-panel2)] p-2">
+    <div
+      className={`group relative flex flex-col items-center gap-1.5 rounded-xl border p-2 ${
+        overVigor
+          ? "border-amber-500/70 bg-amber-500/5"
+          : "border-[var(--color-edge)] bg-[var(--color-panel2)]"
+      }`}
+    >
       <button
         onClick={onClear}
         title="Clear slot"
@@ -196,6 +306,14 @@ function Slot({
         <CharIcon char={char} size="lg" />
         <span className="line-clamp-1 w-full text-center text-[11px] font-medium">{char.name}</span>
       </button>
+      {overVigor && (
+        <span
+          className="text-[9px] font-semibold text-amber-400"
+          title="This resonator is placed in more teams than its Vigor allows."
+        >
+          ⚠ over Vigor
+        </span>
+      )}
 
       <button
         onClick={onEditWeapon}
@@ -212,7 +330,9 @@ function Slot({
           <>
             <WeaponIcon weapon={weapon} size="sm" />
             <span className="min-w-0 flex-1">
-              <span className="line-clamp-1 text-[10px] font-medium">{weapon.name}</span>
+              <span className="line-clamp-2 text-[10px] font-medium leading-tight">
+                {weapon.name}
+              </span>
               {overAllocated && (
                 <span className="text-[9px] text-amber-400">over-assigned</span>
               )}

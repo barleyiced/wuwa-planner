@@ -31,7 +31,9 @@ export function GuidePanel({ onStart }: { onStart: () => void }) {
           each card and <span className="text-slate-400">dims</span> Resonators who are
           out of Vigor or already in the team you're editing. All Rover variants are the
           same body, so they share a single Vigor pool — placing any Rover dims every
-          other Rover.
+          other Rover. If a resonator ever ends up in more teams than its Vigor allows
+          (e.g. from an imported plan), its team slot is flagged{" "}
+          <span className="text-amber-400">amber (over Vigor)</span>.
         </Step>
 
         <Step n={4} title="Assign a weapon">
@@ -51,9 +53,9 @@ export function GuidePanel({ onStart }: { onStart: () => void }) {
 
         <Step n={6} title="Organise up to 20 teams">
           Use <Kbd>+ Add team</Kbd> to create more (max 20). Each team card lets you
-          rename it inline and use <Kbd>↑</Kbd> <Kbd>↓</Kbd> to reorder, <Kbd>⧉</Kbd> to
-          duplicate, and <Kbd>✕</Kbd> to delete. Hover a filled slot and click its{" "}
-          <Kbd>✕</Kbd> to clear just that Resonator.
+          rename it inline, reorder it by dragging the <Kbd>⠿</Kbd> handle (or with{" "}
+          <Kbd>↑</Kbd> <Kbd>↓</Kbd>), and <Kbd>✕</Kbd> to delete. Hover a filled slot
+          and click its <Kbd>✕</Kbd> to clear just that Resonator.
         </Step>
 
         <Step n={7} title="Save, back up & move devices">

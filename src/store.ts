@@ -120,23 +120,6 @@ export function usePlan() {
     }));
   }, []);
 
-  const duplicateTeam = useCallback((teamId: string) => {
-    setState((s) => {
-      if (s.teams.length >= MAX_TEAMS) return s;
-      const idx = s.teams.findIndex((t) => t.id === teamId);
-      if (idx < 0) return s;
-      const src = s.teams[idx];
-      const copy: Team = {
-        id: uid(),
-        name: `${src.name} (copy)`,
-        slots: src.slots.map((sl) => ({ ...sl })),
-      };
-      const teams = [...s.teams];
-      teams.splice(idx + 1, 0, copy);
-      return { ...s, teams };
-    });
-  }, []);
-
   const moveTeam = useCallback((teamId: string, dir: -1 | 1) => {
     setState((s) => {
       const idx = s.teams.findIndex((t) => t.id === teamId);
@@ -144,6 +127,19 @@ export function usePlan() {
       if (idx < 0 || j < 0 || j >= s.teams.length) return s;
       const teams = [...s.teams];
       [teams[idx], teams[j]] = [teams[j], teams[idx]];
+      return { ...s, teams };
+    });
+  }, []);
+
+  const reorderTeam = useCallback((teamId: string, toIndex: number) => {
+    setState((s) => {
+      const from = s.teams.findIndex((t) => t.id === teamId);
+      if (from < 0) return s;
+      const to = Math.max(0, Math.min(toIndex, s.teams.length - 1));
+      if (from === to) return s;
+      const teams = [...s.teams];
+      const [moved] = teams.splice(from, 1);
+      teams.splice(to, 0, moved);
       return { ...s, teams };
     });
   }, []);
@@ -229,8 +225,8 @@ export function usePlan() {
     addTeam,
     removeTeam,
     renameTeam,
-    duplicateTeam,
     moveTeam,
+    reorderTeam,
     setSlotCharacter,
     setSlotWeapon,
     clearSlot,
