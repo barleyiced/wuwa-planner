@@ -1,0 +1,248 @@
+import { useState } from "react";
+import { MAX_TEAMS, type PlanApi, type Team } from "../store";
+import { WEAPON_TYPES, elementOf, type GameData } from "../game";
+import { CharIcon, WeaponIcon } from "./Icon";
+import { CharacterPicker } from "./CharacterPicker";
+import { WeaponPicker } from "./WeaponPicker";
+
+type Editing = { teamId: string; slot: number; mode: "char" | "weapon" } | null;
+
+export function TeamsPanel({ data, plan }: { data: GameData; plan: PlanApi }) {
+  const [editing, setEditing] = useState<Editing>(null);
+
+  const editTeam = editing && plan.state.teams.find((t) => t.id === editing.teamId);
+  const editSlot = editTeam ? editTeam.slots[editing!.slot] : null;
+  const editChar = editSlot?.characterId ? data.characterById[editSlot.characterId] : null;
+
+  return (
+    <div className="mx-auto max-w-5xl px-4 py-5">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-semibold">Teams</h2>
+          <p className="text-xs text-slate-400">
+            {plan.state.teams.length} / {MAX_TEAMS} teams · weapons can't be shared beyond owned copies
+          </p>
+        </div>
+        <button
+          onClick={plan.addTeam}
+          disabled={plan.state.teams.length >= MAX_TEAMS}
+          className="rounded-lg bg-sky-500 px-3 py-2 text-sm font-semibold text-white transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          + Add team
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+        {plan.state.teams.map((team, i) => (
+          <TeamCard
+            key={team.id}
+            team={team}
+            index={i}
+            count={plan.state.teams.length}
+            data={data}
+            plan={plan}
+            onEdit={(slot, mode) => setEditing({ teamId: team.id, slot, mode })}
+          />
+        ))}
+      </div>
+
+      {plan.state.teams.length === 0 && (
+        <div className="py-16 text-center text-sm text-slate-500">
+          No teams yet. Add one to start planning.
+        </div>
+      )}
+
+      {editing && editing.mode === "char" && (
+        <CharacterPicker
+          data={data}
+          current={editSlot?.characterId ?? null}
+          onPick={(cid) => plan.setSlotCharacter(editing.teamId, editing.slot, cid)}
+          onClose={() => setEditing(null)}
+        />
+      )}
+      {editing && editing.mode === "weapon" && editChar && (
+        <WeaponPicker
+          data={data}
+          plan={plan}
+          character={editChar}
+          current={editSlot?.weaponId ?? null}
+          onPick={(wid) => plan.setSlotWeapon(editing.teamId, editing.slot, wid)}
+          onClose={() => setEditing(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+function TeamCard({
+  team,
+  index,
+  count,
+  data,
+  plan,
+  onEdit,
+}: {
+  team: Team;
+  index: number;
+  count: number;
+  data: GameData;
+  plan: PlanApi;
+  onEdit: (slot: number, mode: "char" | "weapon") => void;
+}) {
+  return (
+    <div className="rounded-2xl border border-[var(--color-edge)] bg-[var(--color-panel)] p-3">
+      <div className="mb-2 flex items-center gap-2">
+        <input
+          value={team.name}
+          onChange={(e) => plan.renameTeam(team.id, e.target.value)}
+          className="min-w-0 flex-1 rounded-md bg-transparent px-1 py-0.5 text-sm font-semibold outline-none hover:bg-white/5 focus:bg-white/5"
+        />
+        <div className="flex items-center gap-0.5 text-slate-400">
+          <IconBtn title="Move up" disabled={index === 0} onClick={() => plan.moveTeam(team.id, -1)}>
+            ↑
+          </IconBtn>
+          <IconBtn
+            title="Move down"
+            disabled={index === count - 1}
+            onClick={() => plan.moveTeam(team.id, 1)}
+          >
+            ↓
+          </IconBtn>
+          <IconBtn
+            title="Duplicate"
+            disabled={count >= MAX_TEAMS}
+            onClick={() => plan.duplicateTeam(team.id)}
+          >
+            ⧉
+          </IconBtn>
+          <IconBtn title="Delete team" onClick={() => plan.removeTeam(team.id)} danger>
+            ✕
+          </IconBtn>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-2">
+        {team.slots.map((slot, i) => (
+          <Slot
+            key={i}
+            data={data}
+            plan={plan}
+            characterId={slot.characterId}
+            weaponId={slot.weaponId}
+            onEditChar={() => onEdit(i, "char")}
+            onEditWeapon={() => onEdit(i, "weapon")}
+            onClear={() => plan.clearSlot(team.id, i)}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Slot({
+  data,
+  plan,
+  characterId,
+  weaponId,
+  onEditChar,
+  onEditWeapon,
+  onClear,
+}: {
+  data: GameData;
+  plan: PlanApi;
+  characterId: string | null;
+  weaponId: string | null;
+  onEditChar: () => void;
+  onEditWeapon: () => void;
+  onClear: () => void;
+}) {
+  const char = characterId ? data.characterById[characterId] : null;
+  const weapon = weaponId ? data.weaponById[weaponId] : null;
+  const overAllocated = weaponId ? plan.usage.remaining(weaponId) < 0 : false;
+
+  if (!char) {
+    return (
+      <button
+        onClick={onEditChar}
+        className="flex aspect-[3/4] flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-[var(--color-edge)] text-slate-500 transition hover:border-sky-500/60 hover:text-sky-300"
+      >
+        <span className="text-2xl leading-none">+</span>
+        <span className="text-[10px]">Resonator</span>
+      </button>
+    );
+  }
+
+  const el = elementOf(char.element);
+  return (
+    <div className="group relative flex flex-col items-center gap-1.5 rounded-xl border border-[var(--color-edge)] bg-[var(--color-panel2)] p-2">
+      <button
+        onClick={onClear}
+        title="Clear slot"
+        className="absolute right-1 top-1 z-10 hidden h-5 w-5 items-center justify-center rounded-md bg-black/40 text-[11px] text-slate-300 hover:bg-rose-500/70 hover:text-white group-hover:flex"
+      >
+        ✕
+      </button>
+
+      <button onClick={onEditChar} className="flex flex-col items-center gap-1" title="Change resonator">
+        <CharIcon char={char} size="lg" />
+        <span className="line-clamp-1 w-full text-center text-[11px] font-medium">{char.name}</span>
+      </button>
+
+      <button
+        onClick={onEditWeapon}
+        title={weapon ? weapon.name : "Assign weapon"}
+        className={`flex w-full items-center gap-1.5 rounded-lg border px-1.5 py-1 text-left transition ${
+          overAllocated
+            ? "border-amber-500/70 bg-amber-500/10"
+            : weapon
+            ? "border-[var(--color-edge)] hover:bg-white/5"
+            : "border-dashed border-[var(--color-edge)] text-slate-500 hover:border-sky-500/60 hover:text-sky-300"
+        }`}
+      >
+        {weapon ? (
+          <>
+            <WeaponIcon weapon={weapon} size="sm" />
+            <span className="min-w-0 flex-1">
+              <span className="line-clamp-1 text-[10px] font-medium">{weapon.name}</span>
+              {overAllocated && (
+                <span className="text-[9px] text-amber-400">over-assigned</span>
+              )}
+            </span>
+          </>
+        ) : (
+          <span className="flex w-full items-center justify-center gap-1 py-1 text-[10px]">
+            + {WEAPON_TYPES[char.weaponType]}
+          </span>
+        )}
+      </button>
+      <span className="sr-only">{el.name}</span>
+    </div>
+  );
+}
+
+function IconBtn({
+  children,
+  onClick,
+  title,
+  disabled,
+  danger,
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+  title: string;
+  disabled?: boolean;
+  danger?: boolean;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      title={title}
+      disabled={disabled}
+      className={`flex h-7 w-7 items-center justify-center rounded-md text-sm transition disabled:opacity-25 ${
+        danger ? "hover:bg-rose-500/20 hover:text-rose-300" : "hover:bg-white/10 hover:text-white"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
