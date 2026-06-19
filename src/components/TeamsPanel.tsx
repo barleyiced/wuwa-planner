@@ -15,7 +15,7 @@ export function TeamsPanel({ data, plan }: { data: GameData; plan: PlanApi }) {
   const editChar = editSlot?.characterId ? data.characterById[editSlot.characterId] : null;
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-5">
+    <div className="mx-auto max-w-7xl px-4 py-5">
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold">Teams</h2>

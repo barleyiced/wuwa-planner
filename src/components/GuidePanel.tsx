@@ -1,12 +1,12 @@
 export function GuidePanel({ onStart }: { onStart: () => void }) {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-5">
-      <div className="mb-4">
+    <div className="mx-auto max-w-7xl px-4 py-5">
+      <div className="mx-auto mb-4 max-w-3xl">
         <h2 className="text-lg font-semibold">How to use</h2>
         <p className="text-xs text-slate-400">Plan your endgame teams in a few steps.</p>
       </div>
 
-      <div className="space-y-4 text-sm leading-relaxed text-slate-300">
+      <div className="mx-auto max-w-3xl space-y-4 text-sm leading-relaxed text-slate-300">
         <Step n={1} title="Stock your weapon inventory">
           Open the <Tab>Inventory</Tab> tab, find a weapon (search by name or filter by
           type and rarity), and use the <Kbd>−</Kbd> / <Kbd>+</Kbd> stepper to set how

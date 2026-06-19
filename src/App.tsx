@@ -62,7 +62,7 @@ function Header({
 }) {
   return (
     <header className="sticky top-0 z-30 border-b border-[var(--color-edge)] bg-[var(--color-bg)]/85 backdrop-blur">
-      <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-2.5">
+      <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2.5">
         <div className="flex items-center gap-2">
           <Logo />
           <div className="leading-tight">
