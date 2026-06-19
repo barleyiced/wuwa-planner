@@ -145,7 +145,8 @@ export function iconUrl(assetPath: string): string {
 // ---- loader -------------------------------------------------------------
 
 // v2 adds Character.portrait (the role-pile image) to the cached shape.
-const CACHE_KEY = "wwem.gamedata.v2";
+// v3 filters out cosmetic "Projection" weapon skins — bumped to force a refetch.
+const CACHE_KEY = "wwem.gamedata.v3";
 
 async function resolveVersion(): Promise<string> {
   try {
@@ -181,6 +182,8 @@ function normalize(
     .sort((a, b) => b.rarity - a.rarity || a.name.localeCompare(b.name));
 
   const weapons: Weapon[] = Object.entries(rawWp)
+    // "Projection" entries are cosmetic weapon skins, not real weapons — drop them.
+    .filter(([, w]) => !/^Projection\b/.test(w.en))
     .map(([id, w]) => ({
       id,
       name: w.en,
