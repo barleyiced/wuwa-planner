@@ -4,8 +4,9 @@ import { usePlan, type PlanState } from "./store";
 import { TeamsPanel } from "./components/TeamsPanel";
 import { InventoryPanel } from "./components/InventoryPanel";
 import { GuidePanel } from "./components/GuidePanel";
+import { ChangelogPanel } from "./components/ChangelogPanel";
 
-type Tab = "teams" | "inventory" | "guide";
+type Tab = "teams" | "inventory" | "guide" | "changelog";
 
 export function App() {
   const [data, setData] = useState<GameData | null>(null);
@@ -38,7 +39,8 @@ export function App() {
           </div>
         )}
         {tab === "guide" && <GuidePanel onStart={() => setTab("teams")} />}
-        {tab !== "guide" && !error && !data && <Loading />}
+        {tab === "changelog" && <ChangelogPanel />}
+        {tab !== "guide" && tab !== "changelog" && !error && !data && <Loading />}
         {data && tab === "teams" && <TeamsPanel data={data} plan={plan} />}
         {data && tab === "inventory" && <InventoryPanel data={data} plan={plan} />}
       </main>
@@ -82,6 +84,9 @@ function Header({
           </TabBtn>
           <TabBtn active={tab === "guide"} onClick={() => setTab("guide")}>
             How to use
+          </TabBtn>
+          <TabBtn active={tab === "changelog"} onClick={() => setTab("changelog")}>
+            Changelog
           </TabBtn>
         </nav>
 
