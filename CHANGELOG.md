@@ -86,6 +86,6 @@ Initial release.
   then cached locally.
 - **Deployment** — static SPA (Vite + React + TypeScript + Tailwind), deployed to GitHub Pages.
 
-[Unreleased]: https://example.com/compare/v1.1.0...HEAD
-[1.1.0]: https://example.com/compare/v1.0.0...v1.1.0
-[1.0.0]: https://example.com/releases/tag/v1.0.0
+[Unreleased]: https://github.com/barleyiced/wuwa-planner/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/barleyiced/wuwa-planner/compare/v1.0.0...v1.1.0
+[1.0.0]: https://github.com/barleyiced/wuwa-planner/releases/tag/v1.0.0
