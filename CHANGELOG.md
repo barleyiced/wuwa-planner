@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+<!-- Add more changes for the next release here. Suggested headings:
+### Added
+### Changed
+### Fixed
+### Removed
+-->
+
+## [1.1.0] - 2026-06-20
+
 ### Added
 
 - **Drag-and-drop team reordering** — grab a team card by its handle (⠿) to drag it
@@ -53,12 +62,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   single copy instead of one per team. The weapon picker also lets that resonator
   re-equip a weapon it already holds without reporting it as over-assigned.
 
-<!-- Add more changes for the next release here. Suggested headings:
-### Changed
-### Fixed
-### Removed
--->
-
 ## [1.0.0] - 2026-06-19
 
 Initial release.
@@ -83,5 +86,6 @@ Initial release.
   then cached locally.
 - **Deployment** — static SPA (Vite + React + TypeScript + Tailwind), deployed to GitHub Pages.
 
-[Unreleased]: https://example.com/compare/v1.0.0...HEAD
+[Unreleased]: https://example.com/compare/v1.1.0...HEAD
+[1.1.0]: https://example.com/compare/v1.0.0...v1.1.0
 [1.0.0]: https://example.com/releases/tag/v1.0.0

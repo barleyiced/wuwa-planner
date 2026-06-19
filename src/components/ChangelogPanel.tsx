@@ -8,7 +8,8 @@ type Release = {
 // Concise, visitor-friendly highlights. Full detail lives in CHANGELOG.md.
 const RELEASES: Release[] = [
   {
-    version: "Latest",
+    version: "1.1.0",
+    date: "2026-06-20",
     tag: "new",
     changes: [
       "Drag teams by the ⠿ handle to reorder them (↑/↓ buttons still work too).",
