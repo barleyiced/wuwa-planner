@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b1020"/>
+      <stop offset="1" stop-color="#121a33"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <g transform="translate(96 130)">
+    <rect x="0" y="0" width="120" height="120" rx="26" fill="#0b1020" stroke="#1f2a4d" stroke-width="2"/>
+    <path d="M22 41l15 45 11-34 11 34 11-34 11 34 15-45" fill="none" stroke="#5bd6ff" stroke-width="9" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
+  <text x="96" y="350" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="84" font-weight="700" fill="#f2f5ff">Wuthering Waves</text>
+  <text x="98" y="420" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="48" font-weight="600" fill="#9fb0d6">Endstate Matrix Planner</text>
+  <text x="98" y="490" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="30" font-weight="400" fill="#5bd6ff">Build 20 teams · assign weapons · track your inventory</text>
+</svg>

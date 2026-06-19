@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://barleyiced.github.io/wuwa-planner/sitemap.xml

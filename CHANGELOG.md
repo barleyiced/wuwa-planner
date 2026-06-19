@@ -29,6 +29,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   [ryanbenson/wuthering-waves-assets](https://github.com/ryanbenson/wuthering-waves-assets)
   repo (via jsDelivr, pinned to a commit). The resonator/weapon catalog and portraits
   still come from `static.nanoka.cc`.
+- **SEO & social metadata** — descriptive title/description/keywords, canonical URL,
+  Open Graph and Twitter Card tags, `WebApplication` JSON-LD structured data, a
+  generated `og-image.svg`, plus `robots.txt` and `sitemap.xml`.
 
 <!-- Add more changes for the next release here. Suggested headings:
 ### Changed
