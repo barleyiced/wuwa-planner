@@ -198,9 +198,20 @@ export function usePlan() {
   // ---- derived: weapon usage across all teams ----
   const usage = useMemo<UsageInfo>(() => {
     const used: Record<string, number> = {};
+    // A resonator can appear in several teams (Vigor ≥ 2), but it's one physical
+    // unit holding one weapon — so a given (resonator, weapon) pair only consumes
+    // one copy no matter how many teams it shows up in. Count distinct pairs.
+    const counted = new Set<string>();
     for (const t of state.teams) {
-      for (const sl of t.slots) {
-        if (sl.weaponId) used[sl.weaponId] = (used[sl.weaponId] ?? 0) + 1;
+      for (let i = 0; i < t.slots.length; i++) {
+        const sl = t.slots[i];
+        if (!sl.weaponId) continue;
+        const key = sl.characterId
+          ? `${sl.characterId}|${sl.weaponId}`
+          : `${t.id}:${i}|${sl.weaponId}`; // weapon with no resonator: count alone
+        if (counted.has(key)) continue;
+        counted.add(key);
+        used[sl.weaponId] = (used[sl.weaponId] ?? 0) + 1;
       }
     }
     return {

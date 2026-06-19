@@ -35,6 +35,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Open Graph and Twitter Card tags, `WebApplication` JSON-LD structured data, a
   generated `og-image.svg`, plus `robots.txt` and `sitemap.xml`.
 
+### Fixed
+
+- **Weapon allocation no longer double-counts a multi-team resonator.** A resonator
+  that appears in several teams (Vigor ≥ 2, e.g. a healer) is one physical unit
+  holding one weapon, so equipping the same weapon on it across teams now consumes a
+  single copy instead of one per team. The weapon picker also lets that resonator
+  re-equip a weapon it already holds without reporting it as over-assigned.
+
 <!-- Add more changes for the next release here. Suggested headings:
 ### Changed
 ### Fixed

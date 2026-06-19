@@ -43,12 +43,17 @@ export function WeaponRow({
   /** copies still free across the plan; only meaningful in equip mode */
   remaining?: number;
   onAdjust: (delta: number) => void;
-  equip?: { equipped: boolean; onEquip: () => void };
+  equip?: {
+    equipped: boolean;
+    onEquip: () => void;
+    /** This resonator already holds this weapon elsewhere — costs no extra copy. */
+    reuse?: boolean;
+  };
   /** "row" (default) for lists/pickers, "card" for the inventory grid */
   layout?: "row" | "card";
 }) {
   const canEquip =
-    equip && owned > 0 && (equip.equipped || (remaining ?? 0) > 0);
+    equip && owned > 0 && (equip.equipped || equip.reuse || (remaining ?? 0) > 0);
 
   if (layout === "card") {
     return (
@@ -88,9 +93,18 @@ export function WeaponRow({
             {owned > 0 && equip != null && (
               <>
                 {" · "}
-                <span className={remaining! <= 0 && !equip.equipped ? "text-amber-400" : "text-emerald-400"}>
+                <span
+                  className={
+                    remaining! <= 0 && !equip.equipped && !equip.reuse
+                      ? "text-amber-400"
+                      : "text-emerald-400"
+                  }
+                >
                   {remaining} of {owned} free
                 </span>
+                {equip.reuse && !equip.equipped && remaining! <= 0 && (
+                  <span className="text-slate-400"> · same resonator</span>
+                )}
               </>
             )}
           </span>

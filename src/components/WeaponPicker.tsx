@@ -33,6 +33,18 @@ export function WeaponPicker({
       .filter((w) => (ownedOnly ? plan.usage.owned(w.id) > 0 : true));
   }, [data.weapons, character.weaponType, q, rarity, ownedOnly, plan.usage]);
 
+  // Weapons this same resonator already holds in another team. It's one unit, so
+  // equipping such a weapon here costs no extra copy (the pair is already counted).
+  const reusableForChar = useMemo(() => {
+    const s = new Set<string>();
+    for (const t of plan.state.teams) {
+      for (const sl of t.slots) {
+        if (sl.characterId === character.id && sl.weaponId) s.add(sl.weaponId);
+      }
+    }
+    return s;
+  }, [plan.state.teams, character.id]);
+
   return (
     <Modal
       title={`Weapon for ${character.name}`}
@@ -86,6 +98,7 @@ export function WeaponPicker({
               onAdjust={(d) => plan.adjustOwned(w.id, d)}
               equip={{
                 equipped,
+                reuse: reusableForChar.has(w.id),
                 onEquip: () => {
                   onPick(equipped ? null : w.id);
                   onClose();
