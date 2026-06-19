@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { MAX_TEAMS, type PlanApi, type Team } from "../store";
 import { WEAPON_TYPES, elementOf, type GameData } from "../game";
-import { CharIcon, WeaponIcon } from "./Icon";
+import { CharIcon, WeaponIcon, WeaponTypeIcon } from "./Icon";
 import { CharacterPicker } from "./CharacterPicker";
 import { WeaponPicker } from "./WeaponPicker";
 
@@ -211,7 +211,8 @@ function Slot({
           </>
         ) : (
           <span className="flex w-full items-center justify-center gap-1 py-1 text-[10px]">
-            + {WEAPON_TYPES[char.weaponType]}
+            + <WeaponTypeIcon type={char.weaponType} className="h-3.5 w-3.5" />
+            {WEAPON_TYPES[char.weaponType]}
           </span>
         )}
       </button>

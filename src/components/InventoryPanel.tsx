@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { WEAPON_TYPES, type GameData } from "../game";
 import type { PlanApi } from "../store";
 import { FilterChip } from "./CharacterPicker";
+import { WeaponTypeIcon } from "./Icon";
 import { WeaponRow } from "./WeaponRow";
 
 export function InventoryPanel({ data, plan }: { data: GameData; plan: PlanApi }) {
@@ -59,7 +60,10 @@ export function InventoryPanel({ data, plan }: { data: GameData; plan: PlanApi }
             const n = Number(id);
             return (
               <FilterChip key={id} active={type === n} onClick={() => setType(type === n ? null : n)}>
-                {name}
+                <span className="flex items-center gap-1">
+                  <WeaponTypeIcon type={n} className="h-3.5 w-3.5" />
+                  {name}
+                </span>
               </FilterChip>
             );
           })}

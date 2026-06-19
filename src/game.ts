@@ -56,17 +56,20 @@ export interface GameData {
 
 // ---- display maps (derived by sampling the dataset) ---------------------
 
-// In-game element ("attribute") icons live under this folder on the CDN; the
-// per-element filenames were derived by sampling the dataset's skill trees.
-const ATTR_ICONS = "/Game/Aki/UI/UIResources/Common/Image/IconAttribute";
+// Element and weapon-type icons come from the community-maintained asset repo
+// ryanbenson/wuthering-waves-assets, served via jsDelivr and pinned to a commit
+// for stability. (nanoka serves the data catalog + per-id portraits but has no
+// standalone weapon-type icons; this repo has both fixed icon sets.)
+const ASSETS =
+  "https://cdn.jsdelivr.net/gh/ryanbenson/wuthering-waves-assets@b0d8623a4b87f1d672e45fbcbd5e0e0f2744a75d/images";
 
 export const ELEMENTS: Record<number, { name: string; color: string; icon: string }> = {
-  1: { name: "Glacio", color: "#5ec8f5", icon: iconUrl(`${ATTR_ICONS}/T_Iconpropertyredice_UI`) },
-  2: { name: "Fusion", color: "#ff6a4d", icon: iconUrl(`${ATTR_ICONS}/T_Iconpropertyredhot_UI`) },
-  3: { name: "Electro", color: "#b780ff", icon: iconUrl(`${ATTR_ICONS}/T_Iconpropertyredmine_UI`) },
-  4: { name: "Aero", color: "#54d6a0", icon: iconUrl(`${ATTR_ICONS}/T_Iconpropertyredwind_UI`) },
-  5: { name: "Spectro", color: "#f2d24f", icon: iconUrl(`${ATTR_ICONS}/T_Iconpropertyredlight_UI`) },
-  6: { name: "Havoc", color: "#e85ca0", icon: iconUrl(`${ATTR_ICONS}/T_Iconpropertyreddark_UI`) },
+  1: { name: "Glacio", color: "#5ec8f5", icon: `${ASSETS}/glacio.png` },
+  2: { name: "Fusion", color: "#ff6a4d", icon: `${ASSETS}/fusion.png` },
+  3: { name: "Electro", color: "#b780ff", icon: `${ASSETS}/electro.png` },
+  4: { name: "Aero", color: "#54d6a0", icon: `${ASSETS}/aero.png` },
+  5: { name: "Spectro", color: "#f2d24f", icon: `${ASSETS}/spectro.png` },
+  6: { name: "Havoc", color: "#e85ca0", icon: `${ASSETS}/havoc.png` },
 };
 
 export const WEAPON_TYPES: Record<number, string> = {
@@ -75,6 +78,15 @@ export const WEAPON_TYPES: Record<number, string> = {
   3: "Pistols",
   4: "Gauntlets",
   5: "Rectifier",
+};
+
+/** Weapon-type icon urls, keyed by weapon-type id (same repo as elements). */
+export const WEAPON_TYPE_ICONS: Record<number, string> = {
+  1: `${ASSETS}/broadblade.webp`,
+  2: `${ASSETS}/sword.webp`,
+  3: `${ASSETS}/pistol.webp`,
+  4: `${ASSETS}/gauntlet.webp`,
+  5: `${ASSETS}/rectifier.webp`,
 };
 
 export const RARITY: Record<number, { color: string; glow: string }> = {

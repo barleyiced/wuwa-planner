@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { ELEMENTS, WEAPON_TYPES, type Character, type GameData } from "../game";
-import { CharIcon, ElementIcon, RarityStars } from "./Icon";
+import { CharIcon, ElementIcon, RarityStars, WeaponTypeIcon } from "./Icon";
 import { Modal } from "./Modal";
 
 export function CharacterPicker({
@@ -69,7 +69,10 @@ export function CharacterPicker({
             const on = weaponType === n;
             return (
               <FilterChip key={id} active={on} onClick={() => setWeaponType(on ? null : n)}>
-                {name}
+                <span className="flex items-center gap-1">
+                  <WeaponTypeIcon type={n} className="h-3.5 w-3.5" />
+                  {name}
+                </span>
               </FilterChip>
             );
           })}

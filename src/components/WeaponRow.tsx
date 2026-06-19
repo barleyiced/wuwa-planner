@@ -1,5 +1,5 @@
 import { WEAPON_TYPES, type Weapon } from "../game";
-import { RarityStars, WeaponIcon } from "./Icon";
+import { RarityStars, WeaponIcon, WeaponTypeIcon } from "./Icon";
 
 export function Stepper({
   value,
@@ -55,17 +55,20 @@ export function WeaponRow({
           <span className="truncate text-sm font-medium">{weapon.name}</span>
           <RarityStars rarity={weapon.rarity} />
         </div>
-        <div className="text-[11px] text-slate-400">
-          {WEAPON_TYPES[weapon.type]}
-          {weapon.sub ? ` · ${weapon.sub}` : ""}
-          {owned > 0 && equip != null && (
-            <>
-              {" · "}
-              <span className={remaining! <= 0 && !equip.equipped ? "text-amber-400" : "text-emerald-400"}>
-                {remaining} of {owned} free
-              </span>
-            </>
-          )}
+        <div className="flex items-center gap-1 text-[11px] text-slate-400">
+          <WeaponTypeIcon type={weapon.type} className="h-3.5 w-3.5" />
+          <span>
+            {WEAPON_TYPES[weapon.type]}
+            {weapon.sub ? ` · ${weapon.sub}` : ""}
+            {owned > 0 && equip != null && (
+              <>
+                {" · "}
+                <span className={remaining! <= 0 && !equip.equipped ? "text-amber-400" : "text-emerald-400"}>
+                  {remaining} of {owned} free
+                </span>
+              </>
+            )}
+          </span>
         </div>
       </div>
 

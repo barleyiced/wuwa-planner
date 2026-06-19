@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { RARITY, elementOf, type Character, type Weapon } from "../game";
+import {
+  RARITY,
+  WEAPON_TYPES,
+  WEAPON_TYPE_ICONS,
+  elementOf,
+  type Character,
+  type Weapon,
+} from "../game";
 
 /** Image that fades in and hides itself if the asset fails to load. */
 function Img({ src, alt, className }: { src: string; alt: string; className?: string }) {
@@ -44,6 +51,30 @@ export function ElementIcon({
       src={el.icon}
       alt={el.name}
       title={el.name}
+      loading="lazy"
+      draggable={false}
+      onError={() => setFailed(true)}
+      className={`${className} object-contain`}
+    />
+  );
+}
+
+/** The weapon-type icon. Renders nothing if the asset is missing/fails. */
+export function WeaponTypeIcon({
+  type,
+  className = "h-4 w-4",
+}: {
+  type: number;
+  className?: string;
+}) {
+  const src = WEAPON_TYPE_ICONS[type];
+  const [failed, setFailed] = useState(false);
+  if (!src || failed) return null;
+  return (
+    <img
+      src={src}
+      alt={WEAPON_TYPES[type] ?? "Weapon"}
+      title={WEAPON_TYPES[type]}
       loading="lazy"
       draggable={false}
       onError={() => setFailed(true)}

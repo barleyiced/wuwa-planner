@@ -14,7 +14,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   own **How to use** tab alongside Teams and Inventory.
 - **Element icons** — resonators now show their real in-game element icon (a badge on
   the resonator icon and in the resonator picker's element filter and cards) instead
-  of a plain colored label, loaded from the community CDN (`static.nanoka.cc`).
+  of a plain colored label.
+- **Weapon-type icons** — weapon type is now shown as an icon (in the inventory and
+  resonator-picker filters, weapon rows, and empty team slots) instead of plain text.
+- Element and weapon-type icons are sourced from the community-maintained
+  [ryanbenson/wuthering-waves-assets](https://github.com/ryanbenson/wuthering-waves-assets)
+  repo (via jsDelivr, pinned to a commit). The resonator/weapon catalog and portraits
+  still come from `static.nanoka.cc`.
 
 <!-- Add more changes for the next release here. Suggested headings:
 ### Changed
