@@ -1,16 +1,22 @@
 import { useMemo, useState } from "react";
-import { ELEMENTS, WEAPON_TYPES, type Character, type GameData } from "../game";
-import { CharIcon, ElementIcon, RarityStars, WeaponTypeIcon } from "./Icon";
+import { ELEMENTS, WEAPON_TYPES, vigorOf, type Character, type GameData } from "../game";
+import type { PlanApi } from "../store";
+import { CharPortrait, ElementIcon, WeaponTypeIcon } from "./Icon";
 import { Modal } from "./Modal";
 
 export function CharacterPicker({
   data,
+  plan,
   current,
+  disabledIds,
   onPick,
   onClose,
 }: {
   data: GameData;
+  plan: PlanApi;
   current: string | null;
+  /** Resonators already placed in other slots of this team (can't repeat). */
+  disabledIds: Set<string>;
   onPick: (characterId: string) => void;
   onClose: () => void;
 }) {
@@ -32,16 +38,17 @@ export function CharacterPicker({
 
   return (
     <Modal
-      title="Choose a resonator"
+      title="Choose a Resonator"
       subtitle={`${results.length} of ${data.characters.length}`}
       onClose={onClose}
+      maxWidthClass="max-w-6xl"
     >
       <div className="sticky top-0 z-10 space-y-2 border-b border-[var(--color-edge)] bg-[var(--color-panel)] px-4 py-3">
         <input
           autoFocus
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Search resonators…"
+          placeholder="Search Resonators…"
           className="w-full rounded-lg border border-[var(--color-edge)] bg-[var(--color-panel2)] px-3 py-2 text-sm outline-none placeholder:text-slate-500 focus:border-sky-500"
         />
         <div className="flex flex-wrap gap-1.5">
@@ -87,21 +94,31 @@ export function CharacterPicker({
         </div>
       </div>
 
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(84px,1fr))] gap-2 p-4">
-        {results.map((c) => (
-          <CharacterCard
-            key={c.id}
-            char={c}
-            selected={c.id === current}
-            onPick={() => {
-              onPick(c.id);
-              onClose();
-            }}
-          />
-        ))}
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(118px,1fr))] gap-2.5 p-4">
+        {results.map((c) => {
+          const isCurrent = c.id === current;
+          const inTeam = disabledIds.has(c.id);
+          const noVigor = plan.usage.vigorLeft(c.id) <= 0;
+          const disabled = !isCurrent && (inTeam || noVigor);
+          return (
+            <CharacterCard
+              key={c.id}
+              char={c}
+              selected={isCurrent}
+              disabled={disabled}
+              disabledReason={inTeam ? "In this team" : "No Vigor left"}
+              used={plan.usage.characterUsed[c.id] ?? 0}
+              onPick={() => {
+                if (disabled) return;
+                onPick(c.id);
+                onClose();
+              }}
+            />
+          );
+        })}
         {results.length === 0 && (
           <div className="col-span-full py-10 text-center text-sm text-slate-500">
-            No resonators match those filters.
+            No Resonators match those filters.
           </div>
         )}
       </div>
@@ -112,26 +129,62 @@ export function CharacterPicker({
 function CharacterCard({
   char,
   selected,
+  disabled,
+  disabledReason,
+  used,
   onPick,
 }: {
   char: Character;
   selected: boolean;
+  disabled: boolean;
+  disabledReason: string;
+  used: number;
   onPick: () => void;
 }) {
+  const max = vigorOf(char.id);
   return (
     <button
       onClick={onPick}
-      className={`flex flex-col items-center gap-1 rounded-xl border p-2 text-center transition hover:bg-white/5 ${
-        selected ? "border-sky-400 bg-sky-400/10" : "border-transparent"
-      }`}
+      disabled={disabled}
+      title={disabled ? disabledReason : char.name}
+      aria-disabled={disabled}
+      className={`group relative overflow-hidden rounded-xl border transition ${
+        selected
+          ? "border-sky-400 ring-2 ring-sky-400/50"
+          : "border-[var(--color-edge)] hover:border-sky-500/60"
+      } ${disabled ? "cursor-not-allowed" : "hover:-translate-y-0.5"}`}
     >
-      <CharIcon char={char} size="md" />
-      <span className="line-clamp-1 w-full text-[11px] font-medium">{char.name}</span>
-      <span className="flex items-center gap-1">
-        <RarityStars rarity={char.rarity} />
-        <ElementIcon element={char.element} className="h-3.5 w-3.5" />
-      </span>
+      <div className={disabled ? "opacity-35 grayscale" : ""}>
+        <CharPortrait char={char} />
+      </div>
+
+      <VigorPips used={used} max={max} />
+
+      {disabled && (
+        <span className="absolute inset-x-0 top-1/2 -translate-y-1/2 px-1 text-center text-[10px] font-semibold uppercase tracking-wide text-slate-200">
+          {disabledReason}
+        </span>
+      )}
     </button>
+  );
+}
+
+/** Small Vigor dots in the corner: filled = spent, hollow = available. */
+function VigorPips({ used, max }: { used: number; max: number }) {
+  return (
+    <span
+      className="absolute right-1 top-1 flex gap-0.5 rounded-full bg-black/55 px-1 py-0.5 backdrop-blur-sm"
+      title={`${Math.max(0, max - used)} of ${max} Vigor left`}
+    >
+      {Array.from({ length: max }, (_, i) => (
+        <span
+          key={i}
+          className={`h-1.5 w-1.5 rounded-full ${
+            i < used ? "bg-amber-400" : "bg-white/35 ring-1 ring-white/50"
+          }`}
+        />
+      ))}
+    </span>
   );
 }
 

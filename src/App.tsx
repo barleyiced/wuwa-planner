@@ -32,7 +32,7 @@ export function App() {
             <p className="font-semibold">Couldn't load game data.</p>
             <p className="mt-1 text-rose-300/80">{error}</p>
             <p className="mt-2 text-rose-300/70">
-              Check your connection — the resonator and weapon catalog is fetched from the
+              Check your connection — the Resonator and weapon catalog is fetched from the
               community CDN.
             </p>
           </div>
@@ -231,7 +231,7 @@ function Loading() {
   return (
     <div className="mx-auto mt-24 flex max-w-xs flex-col items-center gap-3 text-slate-400">
       <div className="h-8 w-8 animate-spin rounded-full border-2 border-sky-500/30 border-t-sky-400" />
-      <p className="text-sm">Loading resonators &amp; weapons…</p>
+      <p className="text-sm">Loading Resonators &amp; weapons…</p>
     </div>
   );
 }

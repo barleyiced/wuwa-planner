@@ -5,11 +5,14 @@ export function Modal({
   subtitle,
   onClose,
   children,
+  maxWidthClass = "max-w-3xl",
 }: {
   title: string;
   subtitle?: ReactNode;
   onClose: () => void;
   children: ReactNode;
+  /** Tailwind max-width utility for the dialog (default `max-w-3xl`). */
+  maxWidthClass?: string;
 }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -23,7 +26,7 @@ export function Modal({
       onMouseDown={onClose}
     >
       <div
-        className="my-0 flex max-h-[100dvh] w-full max-w-3xl flex-col overflow-hidden rounded-t-2xl border border-[var(--color-edge)] bg-[var(--color-panel)] shadow-2xl sm:my-auto sm:max-h-[90dvh] sm:rounded-2xl"
+        className={`my-0 flex max-h-[100dvh] w-full ${maxWidthClass} flex-col overflow-hidden rounded-t-2xl border border-[var(--color-edge)] bg-[var(--color-panel)] shadow-2xl sm:my-auto sm:max-h-[90dvh] sm:rounded-2xl`}
         onMouseDown={(e) => e.stopPropagation()}
       >
         <div className="flex shrink-0 items-center justify-between gap-3 border-b border-[var(--color-edge)] px-5 py-3">

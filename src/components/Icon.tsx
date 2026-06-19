@@ -9,7 +9,7 @@ import {
 } from "../game";
 
 /** Image that fades in and hides itself if the asset fails to load. */
-function Img({ src, alt, className }: { src: string; alt: string; className?: string }) {
+export function AssetImg({ src, alt, className }: { src: string; alt: string; className?: string }) {
   const [failed, setFailed] = useState(false);
   if (failed || !src)
     return (
@@ -101,7 +101,7 @@ export function CharIcon({
       }}
       title={char.name}
     >
-      <Img src={char.icon} alt={char.name} className="h-full w-full object-cover" />
+      <AssetImg src={char.icon} alt={char.name} className="h-full w-full object-cover" />
       {el.icon && (
         <span
           className="absolute left-0.5 top-0.5 flex items-center justify-center rounded-full bg-black/45 p-0.5 backdrop-blur-sm"
@@ -114,6 +114,46 @@ export function CharIcon({
         className="absolute bottom-0 left-0 right-0 h-[3px]"
         style={{ background: el.color }}
       />
+    </div>
+  );
+}
+
+/**
+ * Tall "role pile" portrait tile (waist-up) used by the resonator picker.
+ * Renders the element badge, a rarity accent, and the name over a gradient.
+ */
+export function CharPortrait({ char }: { char: Character }) {
+  const r = RARITY[char.rarity] ?? RARITY[4];
+  const el = elementOf(char.element);
+  return (
+    <div
+      className="relative aspect-[3/4] w-full overflow-hidden rounded-xl"
+      style={{
+        background: `linear-gradient(160deg, ${r.color}33, ${el.color}22)`,
+        boxShadow: `inset 0 0 0 1.5px ${r.color}aa`,
+      }}
+    >
+      <AssetImg
+        src={char.portrait || char.icon}
+        alt={char.name}
+        className="h-full w-full object-cover object-top"
+      />
+      {el.icon && (
+        <span
+          className="absolute left-1 top-1 flex items-center justify-center rounded-full bg-black/45 p-0.5 backdrop-blur-sm"
+          style={{ boxShadow: `inset 0 0 0 1px ${el.color}88` }}
+        >
+          <ElementIcon element={char.element} className="h-4 w-4" />
+        </span>
+      )}
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/45 to-transparent px-1.5 pb-1 pt-5">
+        <div className="line-clamp-1 text-center text-xs font-semibold text-white drop-shadow">
+          {char.name}
+        </div>
+        <div className="flex justify-center">
+          <RarityStars rarity={char.rarity} />
+        </div>
+      </div>
     </div>
   );
 }
@@ -135,7 +175,7 @@ export function WeaponIcon({
       }}
       title={weapon.name}
     >
-      <Img src={weapon.icon} alt={weapon.name} className="h-full w-full object-contain p-1" />
+      <AssetImg src={weapon.icon} alt={weapon.name} className="h-full w-full object-contain p-1" />
     </div>
   );
 }

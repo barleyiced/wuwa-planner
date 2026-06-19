@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Vigor system** — resonators can now only be placed in as many teams as they have
+  Vigor (1 by default; 2 for dedicated healers: Baizhi, Verina, Shorekeeper, Buling,
+  Mornye). The resonator picker shows Vigor dots on each card and disables (dims)
+  resonators who are out of Vigor or already placed in the team being edited.
+- **Larger resonator portraits** — the resonator picker now shows the tall in-game
+  "role pile" portraits (with the name and rarity over a gradient) instead of small
+  square head icons. Portraits come from `static.nanoka.cc` (new `background` field;
+  the cached game-data shape is bumped to `wwem.gamedata.v2`).
 - **In-app "How to use" guide** — a step-by-step walkthrough (inventory, team
   building, weapon assignment, allocation warnings, backup/restore) available as its
   own **How to use** tab alongside Teams and Inventory.

@@ -55,8 +55,8 @@ export function WeaponRow({
       <div className="flex flex-col items-center gap-2 rounded-xl border border-[var(--color-edge)] bg-[var(--color-panel2)] px-3 py-3 text-center">
         <WeaponIcon weapon={weapon} size="lg" />
         <div className="min-w-0 w-full">
-          <div className="flex items-center justify-center gap-2">
-            <span className="truncate text-sm font-medium">{weapon.name}</span>
+          <div className="truncate text-sm font-medium">{weapon.name}</div>
+          <div className="flex justify-center">
             <RarityStars rarity={weapon.rarity} />
           </div>
           <div className="flex items-center justify-center gap-1 text-[11px] text-slate-400">

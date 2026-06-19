@@ -55,7 +55,16 @@ export function TeamsPanel({ data, plan }: { data: GameData; plan: PlanApi }) {
       {editing && editing.mode === "char" && (
         <CharacterPicker
           data={data}
+          plan={plan}
           current={editSlot?.characterId ?? null}
+          disabledIds={
+            new Set(
+              (editTeam ? editTeam.slots : [])
+                .filter((_, i) => i !== editing.slot)
+                .map((s) => s.characterId)
+                .filter((id): id is string => id != null)
+            )
+          }
           onPick={(cid) => plan.setSlotCharacter(editing.teamId, editing.slot, cid)}
           onClose={() => setEditing(null)}
         />
@@ -183,7 +192,7 @@ function Slot({
         ✕
       </button>
 
-      <button onClick={onEditChar} className="flex flex-col items-center gap-1" title="Change resonator">
+      <button onClick={onEditChar} className="flex flex-col items-center gap-1" title="Change Resonator">
         <CharIcon char={char} size="lg" />
         <span className="line-clamp-1 w-full text-center text-[11px] font-medium">{char.name}</span>
       </button>

@@ -35,6 +35,8 @@ export interface Character {
   weaponType: number;
   element: number;
   icon: string;
+  /** Tall in-game "role pile" portrait (waist-up), used by the resonator picker. */
+  portrait: string;
 }
 
 export interface Weapon {
@@ -101,6 +103,26 @@ export function elementOf(id: number) {
   return ELEMENTS[id] ?? { name: "Unknown", color: "#9aa7bd", icon: "" };
 }
 
+// ---- Vigor --------------------------------------------------------------
+// Endstate Matrix rule: a resonator loses 1 Vigor each time they fight, so a
+// resonator can be placed in as many teams as they have Vigor. Everyone has 1
+// Vigor by default; dedicated healers get 2, letting them appear in two teams.
+const HEALER_IDS = new Set([
+  "1103", // Baizhi
+  "1503", // Verina
+  "1505", // Shorekeeper
+  "1307", // Buling
+  "1209", // Mornye
+]);
+
+export const DEFAULT_VIGOR = 1;
+export const HEALER_VIGOR = 2;
+
+/** Total Vigor (max teams a resonator can join) for the given character id. */
+export function vigorOf(characterId: string): number {
+  return HEALER_IDS.has(characterId) ? HEALER_VIGOR : DEFAULT_VIGOR;
+}
+
 // ---- icon url -----------------------------------------------------------
 
 /** Convert an in-game asset path into a public CDN webp url. */
@@ -113,7 +135,8 @@ export function iconUrl(assetPath: string): string {
 
 // ---- loader -------------------------------------------------------------
 
-const CACHE_KEY = "wwem.gamedata.v1";
+// v2 adds Character.portrait (the role-pile image) to the cached shape.
+const CACHE_KEY = "wwem.gamedata.v2";
 
 async function resolveVersion(): Promise<string> {
   try {
@@ -139,6 +162,7 @@ function normalize(
       weaponType: c.weapon,
       element: c.element,
       icon: iconUrl(c.icon),
+      portrait: iconUrl(c.background),
     }))
     .sort((a, b) => b.rarity - a.rarity || a.name.localeCompare(b.name));
 

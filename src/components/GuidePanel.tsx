@@ -13,7 +13,7 @@ export function GuidePanel({ onStart }: { onStart: () => void }) {
           many copies you own. Only weapons you own can be equipped on a team.
           <Note>
             Own two copies of a weapon? Set the count to 2 and you can equip it on two
-            different resonators at once.
+            different Resonators at once.
           </Note>
         </Step>
 
@@ -23,14 +23,23 @@ export function GuidePanel({ onStart }: { onStart: () => void }) {
           by element, weapon type, and rarity to choose a character.
         </Step>
 
-        <Step n={3} title="Assign a weapon">
-          Click the weapon bar beneath a resonator. The picker only shows weapons that
+        <Step n={3} title="Mind each Resonator's Vigor">
+          Every Resonator loses 1 Vigor each time they fight, so a Resonator can only
+          appear in as many teams as they have Vigor. Most have <strong>1 Vigor</strong>{" "}
+          (usable in a single team); dedicated healers (Baizhi, Verina, Shorekeeper,
+          Buling, Mornye) have <strong>2 Vigor</strong>. The picker shows Vigor dots on
+          each card and <span className="text-slate-400">dims</span> Resonators who are
+          out of Vigor or already in the team you're editing.
+        </Step>
+
+        <Step n={4} title="Assign a weapon">
+          Click the weapon bar beneath a Resonator. The picker only shows weapons that
           match that character's weapon type. It defaults to <em>In my inventory</em>;
           switch to <em>All weapons</em> to add something new on the spot with its
           stepper, then press <Kbd>Equip</Kbd>.
         </Step>
 
-        <Step n={4} title="Watch your allocation">
+        <Step n={5} title="Watch your allocation">
           Each weapon row shows <span className="text-emerald-400">“N of M free”</span> —
           remaining copies vs. owned. When nothing is free the button reads{" "}
           <span className="text-slate-400">None free</span> and is disabled. If you
@@ -38,14 +47,14 @@ export function GuidePanel({ onStart }: { onStart: () => void }) {
           <span className="text-amber-400">amber (over-assigned)</span> so you can fix it.
         </Step>
 
-        <Step n={5} title="Organise up to 20 teams">
+        <Step n={6} title="Organise up to 20 teams">
           Use <Kbd>+ Add team</Kbd> to create more (max 20). Each team card lets you
           rename it inline and use <Kbd>↑</Kbd> <Kbd>↓</Kbd> to reorder, <Kbd>⧉</Kbd> to
           duplicate, and <Kbd>✕</Kbd> to delete. Hover a filled slot and click its{" "}
-          <Kbd>✕</Kbd> to clear just that resonator.
+          <Kbd>✕</Kbd> to clear just that Resonator.
         </Step>
 
-        <Step n={6} title="Save, back up & move devices">
+        <Step n={7} title="Save, back up & move devices">
           Everything is saved automatically in this browser. Use <Tab>Data ▾</Tab> →{" "}
           <em>Export plan</em> to download a JSON backup, and <em>Import plan</em> to
           restore it (or load it on another device). <em>Reset everything</em> clears all
