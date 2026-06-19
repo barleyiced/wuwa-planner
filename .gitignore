@@ -4,5 +4,6 @@ tsconfig.tsbuildinfo
 _tmp
 *.local
 README.local.md
+CLAUDE.md
 .DS_Store
 .vercel
