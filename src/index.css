@@ -16,10 +16,7 @@ body,
 
 body {
   margin: 0;
-  background:
-    radial-gradient(1200px 600px at 80% -10%, rgba(63, 130, 255, 0.12), transparent 60%),
-    radial-gradient(1000px 500px at -10% 110%, rgba(180, 90, 255, 0.1), transparent 60%),
-    var(--color-bg);
+  background: var(--color-bg);
   color: #e7ecf5;
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;

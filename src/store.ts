@@ -1,6 +1,5 @@
 // Persistent planner state: weapon inventory + teams, saved to localStorage.
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { vigorOf } from "./game";
 
 export const TEAM_SIZE = 3;
 export const MAX_TEAMS = 20;
@@ -65,10 +64,6 @@ export interface UsageInfo {
   /** remaining = owned - used (can be negative when over-allocated) */
   remaining: (weaponId: string) => number;
   owned: (weaponId: string) => number;
-  /** characterId -> number of teams the resonator is currently placed in */
-  characterUsed: Record<string, number>;
-  /** Vigor still available for a resonator (total Vigor − teams joined). */
-  vigorLeft: (characterId: string) => number;
 }
 
 export function usePlan() {
@@ -203,20 +198,15 @@ export function usePlan() {
   // ---- derived: weapon usage across all teams ----
   const usage = useMemo<UsageInfo>(() => {
     const used: Record<string, number> = {};
-    const characterUsed: Record<string, number> = {};
     for (const t of state.teams) {
       for (const sl of t.slots) {
         if (sl.weaponId) used[sl.weaponId] = (used[sl.weaponId] ?? 0) + 1;
-        if (sl.characterId)
-          characterUsed[sl.characterId] = (characterUsed[sl.characterId] ?? 0) + 1;
       }
     }
     return {
       used,
       remaining: (wid) => (state.inventory[wid] ?? 0) - (used[wid] ?? 0),
       owned: (wid) => state.inventory[wid] ?? 0,
-      characterUsed,
-      vigorLeft: (cid) => vigorOf(cid) - (characterUsed[cid] ?? 0),
     };
   }, [state]);
 

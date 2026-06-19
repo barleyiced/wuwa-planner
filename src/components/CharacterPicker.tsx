@@ -1,5 +1,12 @@
 import { useMemo, useState } from "react";
-import { ELEMENTS, WEAPON_TYPES, vigorOf, type Character, type GameData } from "../game";
+import {
+  ELEMENTS,
+  WEAPON_TYPES,
+  vigorGroupKey,
+  vigorOf,
+  type Character,
+  type GameData,
+} from "../game";
 import type { PlanApi } from "../store";
 import { CharPortrait, ElementIcon, WeaponTypeIcon } from "./Icon";
 import { Modal } from "./Modal";
@@ -24,6 +31,27 @@ export function CharacterPicker({
   const [element, setElement] = useState<number | null>(null);
   const [weaponType, setWeaponType] = useState<number | null>(null);
   const [rarity, setRarity] = useState<number | null>(null);
+
+  // Vigor spent per accounting group across the whole plan (Rovers share a group).
+  const groupUsed = useMemo(() => {
+    const m: Record<string, number> = {};
+    for (const t of plan.state.teams) {
+      for (const sl of t.slots) {
+        const ch = sl.characterId ? data.characterById[sl.characterId] : null;
+        if (ch) {
+          const k = vigorGroupKey(ch);
+          m[k] = (m[k] ?? 0) + 1;
+        }
+      }
+    }
+    return m;
+  }, [plan.state.teams, data]);
+
+  // The slot being edited will be vacated, so its occupant shouldn't count
+  // against candidates sharing its group (lets you swap e.g. one Rover element
+  // for another in the same slot).
+  const currentChar = current ? data.characterById[current] : null;
+  const currentGroup = currentChar ? vigorGroupKey(currentChar) : null;
 
   const results = useMemo(() => {
     const needle = q.trim().toLowerCase();
@@ -97,8 +125,11 @@ export function CharacterPicker({
       <div className="grid grid-cols-[repeat(auto-fill,minmax(118px,1fr))] gap-2.5 p-4">
         {results.map((c) => {
           const isCurrent = c.id === current;
+          const group = vigorGroupKey(c);
+          // Don't count the slot we're editing against its own group.
+          const used = (groupUsed[group] ?? 0) - (group === currentGroup ? 1 : 0);
           const inTeam = disabledIds.has(c.id);
-          const noVigor = plan.usage.vigorLeft(c.id) <= 0;
+          const noVigor = used >= vigorOf(c.id);
           const disabled = !isCurrent && (inTeam || noVigor);
           return (
             <CharacterCard
@@ -107,7 +138,7 @@ export function CharacterPicker({
               selected={isCurrent}
               disabled={disabled}
               disabledReason={inTeam ? "In this team" : "No Vigor left"}
-              used={plan.usage.characterUsed[c.id] ?? 0}
+              used={Math.max(0, used)}
               onPick={() => {
                 if (disabled) return;
                 onPick(c.id);

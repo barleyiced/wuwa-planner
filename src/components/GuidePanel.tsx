@@ -29,7 +29,9 @@ export function GuidePanel({ onStart }: { onStart: () => void }) {
           (usable in a single team); dedicated healers (Baizhi, Verina, Shorekeeper,
           Buling, Mornye) have <strong>2 Vigor</strong>. The picker shows Vigor dots on
           each card and <span className="text-slate-400">dims</span> Resonators who are
-          out of Vigor or already in the team you're editing.
+          out of Vigor or already in the team you're editing. All Rover variants are the
+          same body, so they share a single Vigor pool — placing any Rover dims every
+          other Rover.
         </Step>
 
         <Step n={4} title="Assign a weapon">

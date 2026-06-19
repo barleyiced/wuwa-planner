@@ -12,7 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Vigor system** — resonators can now only be placed in as many teams as they have
   Vigor (1 by default; 2 for dedicated healers: Baizhi, Verina, Shorekeeper, Buling,
   Mornye). The resonator picker shows Vigor dots on each card and disables (dims)
-  resonators who are out of Vigor or already placed in the team being edited.
+  resonators who are out of Vigor or already placed in the team being edited. All
+  Rover variants share a single Vigor pool, so fielding any Rover dims every other
+  Rover (you can still swap one Rover element for another in the same slot).
 - **Larger resonator portraits** — the resonator picker now shows the tall in-game
   "role pile" portraits (with the name and rarity over a gradient) instead of small
   square head icons. Portraits come from `static.nanoka.cc` (new `background` field;

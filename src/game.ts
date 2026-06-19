@@ -5,7 +5,7 @@
 // browser can fetch them directly.
 
 const CDN = "https://static.nanoka.cc";
-const PINNED_VERSION = "3.5.2"; // fallback if the manifest can't be resolved
+const PINNED_VERSION = "3.4"; // fallback if the manifest can't be resolved
 
 /** Raw entry shape from `<cdn>/ww/<ver>/character.json` (keyed by id). */
 interface RawCharacter {
@@ -123,6 +123,15 @@ export function vigorOf(characterId: string): number {
   return HEALER_IDS.has(characterId) ? HEALER_VIGOR : DEFAULT_VIGOR;
 }
 
+/**
+ * Key a resonator uses for Vigor accounting. Every Rover (Traveler) variant is
+ * the same body and shares a single Vigor pool — fielding any Rover blocks all
+ * the others — so they collapse to one key. Everyone else keys by their own id.
+ */
+export function vigorGroupKey(char: Character): string {
+  return char.name.startsWith("Rover") ? "rover" : char.id;
+}
+
 // ---- icon url -----------------------------------------------------------
 
 /** Convert an in-game asset path into a public CDN webp url. */
@@ -142,8 +151,11 @@ async function resolveVersion(): Promise<string> {
   try {
     const res = await fetch(`${CDN}/manifest.json`, { cache: "no-cache" });
     if (!res.ok) throw new Error(String(res.status));
-    const m = (await res.json()) as { ww?: { latest?: string } };
-    return m.ww?.latest ?? PINNED_VERSION;
+    // Use `live` (the released game version) rather than `latest`, which
+    // includes unreleased beta content (e.g. upcoming 3.5+ resonators). The
+    // per-version catalog is cumulative, so the live dataset simply omits them.
+    const m = (await res.json()) as { ww?: { live?: string; latest?: string } };
+    return m.ww?.live ?? m.ww?.latest ?? PINNED_VERSION;
   } catch {
     return PINNED_VERSION;
   }
