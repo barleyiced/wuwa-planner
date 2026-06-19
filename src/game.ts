@@ -56,13 +56,17 @@ export interface GameData {
 
 // ---- display maps (derived by sampling the dataset) ---------------------
 
-export const ELEMENTS: Record<number, { name: string; color: string }> = {
-  1: { name: "Glacio", color: "#5ec8f5" },
-  2: { name: "Fusion", color: "#ff6a4d" },
-  3: { name: "Electro", color: "#b780ff" },
-  4: { name: "Aero", color: "#54d6a0" },
-  5: { name: "Spectro", color: "#f2d24f" },
-  6: { name: "Havoc", color: "#e85ca0" },
+// In-game element ("attribute") icons live under this folder on the CDN; the
+// per-element filenames were derived by sampling the dataset's skill trees.
+const ATTR_ICONS = "/Game/Aki/UI/UIResources/Common/Image/IconAttribute";
+
+export const ELEMENTS: Record<number, { name: string; color: string; icon: string }> = {
+  1: { name: "Glacio", color: "#5ec8f5", icon: iconUrl(`${ATTR_ICONS}/T_Iconpropertyredice_UI`) },
+  2: { name: "Fusion", color: "#ff6a4d", icon: iconUrl(`${ATTR_ICONS}/T_Iconpropertyredhot_UI`) },
+  3: { name: "Electro", color: "#b780ff", icon: iconUrl(`${ATTR_ICONS}/T_Iconpropertyredmine_UI`) },
+  4: { name: "Aero", color: "#54d6a0", icon: iconUrl(`${ATTR_ICONS}/T_Iconpropertyredwind_UI`) },
+  5: { name: "Spectro", color: "#f2d24f", icon: iconUrl(`${ATTR_ICONS}/T_Iconpropertyredlight_UI`) },
+  6: { name: "Havoc", color: "#e85ca0", icon: iconUrl(`${ATTR_ICONS}/T_Iconpropertyreddark_UI`) },
 };
 
 export const WEAPON_TYPES: Record<number, string> = {
@@ -82,7 +86,7 @@ export const RARITY: Record<number, { color: string; glow: string }> = {
 };
 
 export function elementOf(id: number) {
-  return ELEMENTS[id] ?? { name: "Unknown", color: "#9aa7bd" };
+  return ELEMENTS[id] ?? { name: "Unknown", color: "#9aa7bd", icon: "" };
 }
 
 // ---- icon url -----------------------------------------------------------

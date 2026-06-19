@@ -1,12 +1,6 @@
 import { useMemo, useState } from "react";
-import {
-  ELEMENTS,
-  WEAPON_TYPES,
-  elementOf,
-  type Character,
-  type GameData,
-} from "../game";
-import { CharIcon, RarityStars } from "./Icon";
+import { ELEMENTS, WEAPON_TYPES, type Character, type GameData } from "../game";
+import { CharIcon, ElementIcon, RarityStars } from "./Icon";
 import { Modal } from "./Modal";
 
 export function CharacterPicker({
@@ -61,7 +55,10 @@ export function CharacterPicker({
                 color={el.color}
                 onClick={() => setElement(on ? null : n)}
               >
-                {el.name}
+                <span className="flex items-center gap-1">
+                  <ElementIcon element={n} className="h-3.5 w-3.5" />
+                  {el.name}
+                </span>
               </FilterChip>
             );
           })}
@@ -118,7 +115,6 @@ function CharacterCard({
   selected: boolean;
   onPick: () => void;
 }) {
-  const el = elementOf(char.element);
   return (
     <button
       onClick={onPick}
@@ -130,9 +126,7 @@ function CharacterCard({
       <span className="line-clamp-1 w-full text-[11px] font-medium">{char.name}</span>
       <span className="flex items-center gap-1">
         <RarityStars rarity={char.rarity} />
-        <span className="text-[9px]" style={{ color: el.color }}>
-          {el.name}
-        </span>
+        <ElementIcon element={char.element} className="h-3.5 w-3.5" />
       </span>
     </button>
   );

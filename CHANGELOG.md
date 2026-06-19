@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **In-app "How to use" guide** — a step-by-step walkthrough (inventory, team
   building, weapon assignment, allocation warnings, backup/restore) available as its
   own **How to use** tab alongside Teams and Inventory.
+- **Element icons** — resonators now show their real in-game element icon (a badge on
+  the resonator icon and in the resonator picker's element filter and cards) instead
+  of a plain colored label, loaded from the community CDN (`static.nanoka.cc`).
 
 <!-- Add more changes for the next release here. Suggested headings:
 ### Changed
@@ -41,7 +44,7 @@ Initial release.
 - **Live game data** — resonator/weapon catalog is fetched at runtime and the latest
   game version is resolved from the site manifest (falls back to a pinned version),
   then cached locally.
-- **Deployment** — static SPA (Vite + React + TypeScript + Tailwind), ready for Vercel.
+- **Deployment** — static SPA (Vite + React + TypeScript + Tailwind), deployed to GitHub Pages.
 
 [Unreleased]: https://example.com/compare/v1.0.0...HEAD
 [1.0.0]: https://example.com/releases/tag/v1.0.0

@@ -28,6 +28,30 @@ const sizeMap: Record<string, string> = {
   lg: "h-16 w-16",
 };
 
+/** The element's in-game icon. Renders nothing if the asset is missing/fails. */
+export function ElementIcon({
+  element,
+  className = "h-4 w-4",
+}: {
+  element: number;
+  className?: string;
+}) {
+  const el = elementOf(element);
+  const [failed, setFailed] = useState(false);
+  if (!el.icon || failed) return null;
+  return (
+    <img
+      src={el.icon}
+      alt={el.name}
+      title={el.name}
+      loading="lazy"
+      draggable={false}
+      onError={() => setFailed(true)}
+      className={`${className} object-contain`}
+    />
+  );
+}
+
 export function CharIcon({
   char,
   size = "md",
@@ -47,6 +71,14 @@ export function CharIcon({
       title={char.name}
     >
       <Img src={char.icon} alt={char.name} className="h-full w-full object-cover" />
+      {el.icon && (
+        <span
+          className="absolute left-0.5 top-0.5 flex items-center justify-center rounded-full bg-black/45 p-0.5 backdrop-blur-sm"
+          style={{ boxShadow: `inset 0 0 0 1px ${el.color}88` }}
+        >
+          <ElementIcon element={char.element} className="h-3.5 w-3.5" />
+        </span>
+      )}
       <span
         className="absolute bottom-0 left-0 right-0 h-[3px]"
         style={{ background: el.color }}
