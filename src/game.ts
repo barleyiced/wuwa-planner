@@ -151,11 +151,13 @@ async function resolveVersion(): Promise<string> {
   try {
     const res = await fetch(`${CDN}/manifest.json`, { cache: "no-cache" });
     if (!res.ok) throw new Error(String(res.status));
-    // Use `live` (the released game version) rather than `latest`, which
+    // Use `live` (the released game version), never `latest` — the latter
     // includes unreleased beta content (e.g. upcoming 3.5+ resonators). The
     // per-version catalog is cumulative, so the live dataset simply omits them.
-    const m = (await res.json()) as { ww?: { live?: string; latest?: string } };
-    return m.ww?.live ?? m.ww?.latest ?? PINNED_VERSION;
+    // If `live` is absent, fall back to the pinned released version rather than
+    // `latest`, so we can never serve unreleased content.
+    const m = (await res.json()) as { ww?: { live?: string } };
+    return m.ww?.live ?? PINNED_VERSION;
   } catch {
     return PINNED_VERSION;
   }
