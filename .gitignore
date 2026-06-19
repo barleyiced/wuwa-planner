@@ -3,5 +3,6 @@ dist
 tsconfig.tsbuildinfo
 _tmp
 *.local
+README.local.md
 .DS_Store
 .vercel

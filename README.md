@@ -1,50 +1,47 @@
-# WuWa Endstate Matrix Planner
+# Changelog
 
-A fan-made planner for **Wuthering Waves** endgame (Tower of Adversity / Endstate
-Matrix) team comps. Build up to **20 teams**, assign each resonator a weapon, and
-track your **weapon inventory** — a weapon can only be equipped on as many
-characters as you own copies of it.
+All notable changes to the **WuWa Endstate Matrix Planner** are documented here.
 
-- 🧩 Up to 20 teams, 3 resonators each, with per-character weapon assignment
-- 🗡️ Weapon inventory with owned-copy counts; over-assignment is flagged live
-- 🖼️ Real resonator head icons + weapon icons (community CDN, `static.nanoka.cc`)
-- 💾 Everything saved to your browser's `localStorage`; export/import as JSON
-- 🔌 No backend — a static SPA, ideal for Vercel
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Develop
+## [Unreleased]
 
-```bash
-npm install
-npm run dev      # http://localhost:5173
-```
+### Added
 
-## Build
+- **In-app "How to use" guide** — a step-by-step walkthrough (inventory, team
+  building, weapon assignment, allocation warnings, backup/restore) available as its
+  own **How to use** tab alongside Teams and Inventory.
 
-```bash
-npm run build    # outputs to ./dist
-npm run preview  # serve the production build locally
-```
+<!-- Add more changes for the next release here. Suggested headings:
+### Changed
+### Fixed
+### Removed
+-->
 
-## Deploy to Vercel
+## [1.0.0] - 2026-06-19
 
-The repo is a standard Vite app, which Vercel detects automatically.
+Initial release.
 
-**Option A — dashboard:** push this repo to GitHub, then "Add New Project" on
-[vercel.com](https://vercel.com) and import it. Defaults are correct
-(Build Command `npm run build`, Output Directory `dist`).
+### Added
 
-**Option B — CLI:**
+- **Team planner** — build up to 20 teams of 3 resonators each. Rename, reorder
+  (up/down), duplicate, and delete teams.
+- **Weapon inventory** — browse the full weapon catalog, search by name, filter by
+  weapon type and rarity, and record how many copies of each weapon you own.
+- **Weapon allocation tracking** — a weapon can only be equipped on as many
+  resonators as you own copies. The weapon picker shows remaining free copies,
+  disables equipping when none are free, and flags over-assignment in amber on both
+  the team slot and the inventory summary.
+- **Resonator & weapon icons** — real head icons and weapon icons loaded from the
+  community CDN (`static.nanoka.cc`), with element accents and rarity framing.
+- **Resonator picker** — search and filter by element, weapon type, and rarity.
+- **Persistence** — teams and inventory are saved to the browser's `localStorage`.
+- **Import / export** — download the full plan as JSON and load it back later.
+- **Live game data** — resonator/weapon catalog is fetched at runtime and the latest
+  game version is resolved from the site manifest (falls back to a pinned version),
+  then cached locally.
+- **Deployment** — static SPA (Vite + React + TypeScript + Tailwind), ready for Vercel.
 
-```bash
-npm i -g vercel
-vercel          # preview deploy
-vercel --prod   # production deploy
-```
-
-## Data & assets
-
-Resonator/weapon catalog and icons are fetched at runtime from
-`static.nanoka.cc` (a mirror of hakush.in) and cached in `localStorage`. The
-latest game version is resolved from the site manifest, falling back to a pinned
-version if the manifest is unreachable. This project is not affiliated with Kuro
-Games.
+[Unreleased]: https://example.com/compare/v1.0.0...HEAD
+[1.0.0]: https://example.com/releases/tag/v1.0.0
