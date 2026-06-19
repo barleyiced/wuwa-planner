@@ -36,6 +36,7 @@ export function WeaponRow({
   remaining,
   onAdjust,
   equip,
+  layout = "row",
 }: {
   weapon: Weapon;
   owned: number;
@@ -43,9 +44,33 @@ export function WeaponRow({
   remaining?: number;
   onAdjust: (delta: number) => void;
   equip?: { equipped: boolean; onEquip: () => void };
+  /** "row" (default) for lists/pickers, "card" for the inventory grid */
+  layout?: "row" | "card";
 }) {
   const canEquip =
     equip && owned > 0 && (equip.equipped || (remaining ?? 0) > 0);
+
+  if (layout === "card") {
+    return (
+      <div className="flex flex-col items-center gap-2 rounded-xl border border-[var(--color-edge)] bg-[var(--color-panel2)] px-3 py-3 text-center">
+        <WeaponIcon weapon={weapon} size="lg" />
+        <div className="min-w-0 w-full">
+          <div className="flex items-center justify-center gap-2">
+            <span className="truncate text-sm font-medium">{weapon.name}</span>
+            <RarityStars rarity={weapon.rarity} />
+          </div>
+          <div className="flex items-center justify-center gap-1 text-[11px] text-slate-400">
+            <WeaponTypeIcon type={weapon.type} className="h-3.5 w-3.5" />
+            <span>
+              {WEAPON_TYPES[weapon.type]}
+              {weapon.sub ? ` · ${weapon.sub}` : ""}
+            </span>
+          </div>
+        </div>
+        <Stepper value={owned} onChange={onAdjust} />
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center gap-3 rounded-xl border border-[var(--color-edge)] bg-[var(--color-panel2)] px-3 py-2">

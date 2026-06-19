@@ -35,7 +35,7 @@ export function InventoryPanel({ data, plan }: { data: GameData; plan: PlanApi }
   }, [plan.state.inventory, plan.usage]);
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-5">
+    <div className="mx-auto max-w-7xl px-4 py-5">
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <div>
           <h2 className="text-lg font-semibold">Weapon inventory</h2>
@@ -80,17 +80,18 @@ export function InventoryPanel({ data, plan }: { data: GameData; plan: PlanApi }
         </div>
       </div>
 
-      <div className="mt-3 space-y-2">
+      <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
         {list.map((w) => (
           <WeaponRow
             key={w.id}
+            layout="card"
             weapon={w}
             owned={plan.usage.owned(w.id)}
             onAdjust={(d) => plan.adjustOwned(w.id, d)}
           />
         ))}
         {list.length === 0 && (
-          <div className="py-12 text-center text-sm text-slate-500">No weapons match those filters.</div>
+          <div className="col-span-full py-12 text-center text-sm text-slate-500">No weapons match those filters.</div>
         )}
       </div>
     </div>
