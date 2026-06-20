@@ -576,7 +576,7 @@ function NodeSquare({
   );
 }
 
-/** Compact −/+ number stepper, clamped to [min, max]. */
+/** Compact −/+ number stepper with a type-able value, clamped to [min, max]. */
 function MiniStepper({
   value,
   min,
@@ -588,6 +588,15 @@ function MiniStepper({
   max: number;
   onChange: (v: number) => void;
 }) {
+  // Local draft so the field can be cleared/half-typed without snapping back.
+  const [draft, setDraft] = useState<string | null>(null);
+
+  const commit = (raw: string) => {
+    setDraft(null);
+    const n = parseInt(raw, 10);
+    if (!Number.isNaN(n)) onChange(Math.min(max, Math.max(min, n)));
+  };
+
   return (
     <div className="flex items-center overflow-hidden rounded-lg border border-[var(--color-edge)]">
       <button
@@ -598,7 +607,23 @@ function MiniStepper({
       >
         −
       </button>
-      <span className="w-6 text-center text-sm tabular-nums">{value}</span>
+      <input
+        type="text"
+        inputMode="numeric"
+        value={draft ?? value}
+        onChange={(e) => setDraft(e.target.value.replace(/[^0-9]/g, ""))}
+        onFocus={(e) => e.target.select()}
+        onBlur={(e) => commit(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") e.currentTarget.blur();
+          else if (e.key === "Escape") {
+            setDraft(null);
+            e.currentTarget.blur();
+          }
+        }}
+        aria-label="Value"
+        className="w-7 bg-transparent text-center text-sm tabular-nums outline-none focus:bg-white/10"
+      />
       <button
         onClick={() => onChange(value + 1)}
         disabled={value >= max}
