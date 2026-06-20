@@ -8,9 +8,19 @@ type Release = {
 // Concise, visitor-friendly highlights. Full detail lives in CHANGELOG.md.
 const RELEASES: Release[] = [
   {
+    version: "1.2.0",
+    date: "2026-06-21",
+    tag: "new",
+    changes: [
+      "Material Calculator — a pre-farming planner that aggregates every upgrade material into one shopping list.",
+      "Set current→target Level, Ascension, the five active skills, and the forte nodes per Resonator (and weapon).",
+      "Track how many of each material you own, then see what's still left to farm — with a Waveplate/days estimate.",
+      "Foldable sidebar navigation and a new landing page introducing the tools.",
+    ],
+  },
+  {
     version: "1.1.0",
     date: "2026-06-20",
-    tag: "new",
     changes: [
       "Drag teams by the ⠿ handle to reorder them (↑/↓ buttons still work too).",
       "Vigor system — Resonators can join only as many teams as they have Vigor.",
