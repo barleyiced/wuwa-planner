@@ -1,18 +1,56 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { loadGameData, type GameData } from "./game";
-import { usePlan, type PlanState } from "./store";
-import { TeamsPanel } from "./components/TeamsPanel";
-import { InventoryPanel } from "./components/InventoryPanel";
-import { GuidePanel } from "./components/GuidePanel";
+import { usePlan } from "./store";
+import { useCalc } from "./calc";
+import { Sidebar, type Route } from "./components/Sidebar";
+import { HomePanel } from "./components/HomePanel";
+import { MatrixView } from "./components/MatrixView";
+import { CalcPanel } from "./components/CalcPanel";
 import { ChangelogPanel } from "./components/ChangelogPanel";
+import { migrateLegacy } from "./storage";
 
-type Tab = "teams" | "inventory" | "guide" | "changelog";
+// UI shell state (active route + sidebar fold) persists separately from plan data.
+const UI_KEY = "wuwa.ui.v1";
+// Pre-1.2 builds stored UI shell state under the old "wwem" prefix.
+const LEGACY_UI_KEY = "wwem.ui.v1";
+const ROUTES: Route[] = ["home", "matrix", "calc", "changelog"];
+
+interface UiState {
+  route: Route;
+  collapsed: boolean;
+}
+
+function loadUi(): UiState {
+  try {
+    const raw = localStorage.getItem(UI_KEY) ?? migrateLegacy(LEGACY_UI_KEY, UI_KEY);
+    if (raw) {
+      const u = JSON.parse(raw) as Partial<UiState>;
+      const route = u.route && ROUTES.includes(u.route) ? u.route : "home";
+      return { route, collapsed: Boolean(u.collapsed) };
+    }
+  } catch {
+    /* ignore */
+  }
+  return { route: "home", collapsed: false };
+}
 
 export function App() {
   const [data, setData] = useState<GameData | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [tab, setTab] = useState<Tab>("teams");
+  const [ui, setUi] = useState<UiState>(loadUi);
   const plan = usePlan();
+  const calc = useCalc();
+
+  const setRoute = (route: Route) => setUi((u) => ({ ...u, route }));
+  const setCollapsed = (collapsed: boolean) => setUi((u) => ({ ...u, collapsed }));
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(UI_KEY, JSON.stringify(ui));
+    } catch {
+      /* ignore */
+    }
+  }, [ui]);
 
   useEffect(() => {
     let alive = true;
@@ -24,211 +62,45 @@ export function App() {
     };
   }, []);
 
-  return (
-    <div className="flex min-h-full flex-col">
-      <Header tab={tab} setTab={setTab} plan={plan} version={data?.version} />
-      <main className="flex-1">
-        {error && (
-          <div className="mx-auto mt-10 max-w-md rounded-xl border border-rose-500/40 bg-rose-500/10 p-4 text-sm text-rose-200">
-            <p className="font-semibold">Couldn't load game data.</p>
-            <p className="mt-1 text-rose-300/80">{error}</p>
-            <p className="mt-2 text-rose-300/70">
-              Check your connection — the Resonator and weapon catalog is fetched from the
-              community CDN.
-            </p>
-          </div>
-        )}
-        {tab === "guide" && <GuidePanel onStart={() => setTab("teams")} />}
-        {tab === "changelog" && <ChangelogPanel />}
-        {tab !== "guide" && tab !== "changelog" && !error && !data && <Loading />}
-        {data && tab === "teams" && <TeamsPanel data={data} plan={plan} />}
-        {data && tab === "inventory" && <InventoryPanel data={data} plan={plan} />}
-      </main>
-      <footer className="px-4 py-6 text-center text-[11px] text-slate-600">
-        Fan-made planner · data &amp; icons via static.nanoka.cc · not affiliated with Kuro Games
-      </footer>
-    </div>
-  );
-}
+  const needsData = ui.route === "matrix" || ui.route === "calc";
 
-function Header({
-  tab,
-  setTab,
-  plan,
-  version,
-}: {
-  tab: Tab;
-  setTab: (t: Tab) => void;
-  plan: ReturnType<typeof usePlan>;
-  version?: string;
-}) {
   return (
-    <header className="sticky top-0 z-30 border-b border-[var(--color-edge)] bg-[var(--color-bg)]/85 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2.5">
-        <div className="flex items-center gap-2">
-          <Logo />
-          <div className="leading-tight">
-            <div className="text-sm font-semibold">Endstate Matrix Planner</div>
-            <div className="hidden text-[10px] text-slate-500 sm:block">
-              Wuthering Waves {version ? `· data ${version}` : ""}
+    <div className="flex min-h-full">
+      <Sidebar
+        route={ui.route}
+        setRoute={setRoute}
+        collapsed={ui.collapsed}
+        setCollapsed={setCollapsed}
+        plan={plan}
+        version={data?.version}
+      />
+
+      <div className="flex min-w-0 flex-1 flex-col">
+        <main className="flex-1">
+          {error && needsData && (
+            <div className="mx-auto mt-10 max-w-md rounded-xl border border-rose-500/40 bg-rose-500/10 p-4 text-sm text-rose-200">
+              <p className="font-semibold">Couldn't load game data.</p>
+              <p className="mt-1 text-rose-300/80">{error}</p>
+              <p className="mt-2 text-rose-300/70">
+                Check your connection — the Resonator and weapon catalog is fetched from the
+                community CDN.
+              </p>
             </div>
-          </div>
-        </div>
+          )}
 
-        <nav className="ml-2 flex items-center gap-1 rounded-lg bg-[var(--color-panel2)] p-0.5">
-          <TabBtn active={tab === "teams"} onClick={() => setTab("teams")}>
-            Teams
-          </TabBtn>
-          <TabBtn active={tab === "inventory"} onClick={() => setTab("inventory")}>
-            Inventory
-          </TabBtn>
-          <TabBtn active={tab === "guide"} onClick={() => setTab("guide")}>
-            How to use
-          </TabBtn>
-          <TabBtn active={tab === "changelog"} onClick={() => setTab("changelog")}>
-            Changelog
-          </TabBtn>
-        </nav>
+          {ui.route === "home" && <HomePanel onNavigate={setRoute} />}
+          {ui.route === "changelog" && <ChangelogPanel />}
+          {needsData && !error && !data && <Loading />}
+          {data && ui.route === "matrix" && <MatrixView data={data} plan={plan} />}
+          {data && ui.route === "calc" && <CalcPanel data={data} calc={calc} />}
+        </main>
 
-        <div className="ml-auto">
-          <DataMenu plan={plan} />
-        </div>
+        <footer className="px-4 py-6 text-center text-[11px] text-slate-600">
+          Fan-made planner · data &amp; icons via static.nanoka.cc · costs via community datamine
+          · not affiliated with Kuro Games
+        </footer>
       </div>
-    </header>
-  );
-}
-
-function TabBtn({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
-        active ? "bg-sky-500 text-white" : "text-slate-300 hover:bg-white/5"
-      }`}
-    >
-      {children}
-    </button>
-  );
-}
-
-function DataMenu({ plan }: { plan: ReturnType<typeof usePlan> }) {
-  const [open, setOpen] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
-
-  const doExport = () => {
-    const blob = new Blob([JSON.stringify(plan.state, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "wwem-plan.json";
-    a.click();
-    URL.revokeObjectURL(url);
-    setOpen(false);
-  };
-
-  const doImport = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const parsed = JSON.parse(String(reader.result)) as PlanState;
-        if (!parsed.inventory || !Array.isArray(parsed.teams))
-          throw new Error("not a plan file");
-        plan.importState(parsed);
-      } catch {
-        alert("That file doesn't look like a valid plan export.");
-      }
-    };
-    reader.readAsText(file);
-    setOpen(false);
-  };
-
-  return (
-    <div className="relative">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="rounded-lg border border-[var(--color-edge)] px-3 py-1.5 text-sm text-slate-300 hover:bg-white/5"
-      >
-        Data ▾
-      </button>
-      {open && (
-        <>
-          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 z-50 mt-1 w-44 overflow-hidden rounded-lg border border-[var(--color-edge)] bg-[var(--color-panel)] py-1 text-sm shadow-xl">
-            <MenuItem onClick={doExport}>Export plan…</MenuItem>
-            <MenuItem onClick={() => fileRef.current?.click()}>Import plan…</MenuItem>
-            <div className="my-1 h-px bg-[var(--color-edge)]" />
-            <MenuItem
-              danger
-              onClick={() => {
-                if (confirm("Clear all teams and inventory? This can't be undone."))
-                  plan.resetAll();
-                setOpen(false);
-              }}
-            >
-              Reset everything
-            </MenuItem>
-          </div>
-        </>
-      )}
-      <input
-        ref={fileRef}
-        type="file"
-        accept="application/json,.json"
-        className="hidden"
-        onChange={(e) => {
-          const f = e.target.files?.[0];
-          if (f) doImport(f);
-          e.target.value = "";
-        }}
-      />
     </div>
-  );
-}
-
-function MenuItem({
-  children,
-  onClick,
-  danger,
-}: {
-  children: React.ReactNode;
-  onClick: () => void;
-  danger?: boolean;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`block w-full px-3 py-1.5 text-left hover:bg-white/5 ${
-        danger ? "text-rose-300" : "text-slate-200"
-      }`}
-    >
-      {children}
-    </button>
-  );
-}
-
-function Logo() {
-  return (
-    <svg viewBox="0 0 32 32" className="h-7 w-7">
-      <rect width="32" height="32" rx="7" fill="#0e1422" stroke="#243049" />
-      <path
-        d="M5 11l4 12 3-9 3 9 3-9 3 9 4-12"
-        fill="none"
-        stroke="#5bd6ff"
-        strokeWidth="2.4"
-        strokeLinejoin="round"
-        strokeLinecap="round"
-      />
-    </svg>
   );
 }
 

@@ -1,5 +1,6 @@
 // Persistent planner state: weapon inventory + teams, saved to localStorage.
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { migrateLegacy } from "./storage";
 
 export const TEAM_SIZE = 3;
 export const MAX_TEAMS = 20;
@@ -21,7 +22,9 @@ export interface PlanState {
   teams: Team[];
 }
 
-const STORAGE_KEY = "wwem.plan.v1";
+const STORAGE_KEY = "wuwa.plan.v1";
+// Pre-1.2 builds stored the plan under the old "wwem" (Endstate Matrix) prefix.
+const LEGACY_STORAGE_KEY = "wwem.plan.v1";
 
 const uid = () =>
   Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -39,7 +42,7 @@ function makeTeam(name: string): Team {
 
 function initialState(): PlanState {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(STORAGE_KEY) ?? migrateLegacy(LEGACY_STORAGE_KEY, STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as PlanState;
       if (parsed && parsed.inventory && Array.isArray(parsed.teams)) {

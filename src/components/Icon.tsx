@@ -4,7 +4,9 @@ import {
   WEAPON_TYPES,
   WEAPON_TYPE_ICONS,
   elementOf,
+  itemIconUrl,
   type Character,
+  type MaterialItem,
   type Weapon,
 } from "../game";
 
@@ -176,6 +178,33 @@ export function WeaponIcon({
       title={weapon.name}
     >
       <AssetImg src={weapon.icon} alt={weapon.name} className="h-full w-full object-contain p-1" />
+    </div>
+  );
+}
+
+/** A material item tile (rarity-tinted), used by the calculator shopping list. */
+export function ItemIcon({
+  item,
+  size = "md",
+}: {
+  item: MaterialItem;
+  size?: keyof typeof sizeMap;
+}) {
+  const r = RARITY[item.rarity] ?? RARITY[3];
+  return (
+    <div
+      className={`relative ${sizeMap[size]} shrink-0 overflow-hidden rounded-lg`}
+      style={{
+        background: `radial-gradient(circle at 50% 30%, ${r.color}33, transparent 72%)`,
+        boxShadow: `inset 0 0 0 1.5px ${r.color}99`,
+      }}
+      title={item.name}
+    >
+      <AssetImg
+        src={itemIconUrl(item.icon)}
+        alt={item.name}
+        className="h-full w-full object-contain p-0.5"
+      />
     </div>
   );
 }

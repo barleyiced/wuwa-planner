@@ -142,11 +142,148 @@ export function iconUrl(assetPath: string): string {
   return `${CDN}/assets/ww/${rel}.webp`;
 }
 
+// ---- material calculator data -------------------------------------------
+// Upgrade-material costs are not on nanoka; they are precomputed offline by
+// scripts/build-materials.mjs into a committed bundle (joined from the Arikatsu
+// datamine) and imported here. The bundle is pinned to a released version (≤3.4),
+// so the calculator never covers unreleased content. Refresh it on a version bump.
+import materialsBundle from "./data/materials.3.4.json";
+
+/** A single (item, quantity) cost line. `id` indexes MaterialData.items. */
+export interface CostEntry {
+  id: number;
+  qty: number;
+}
+
+/** One breakthrough/ascension tier (BreachLevel) with its material cost. */
+export interface AscensionTier {
+  level: number; // 1..6
+  consume: CostEntry[];
+}
+
+/** Cost to raise one active skill to the given level (2..10). */
+export interface SkillLevelCost {
+  lvl: number;
+  consume: CostEntry[];
+}
+
+export type SkillKey = "normal" | "skill" | "circuit" | "liberation" | "intro";
+
+/** One active skill slot: its in-game name, icon, and 2→10 level costs. */
+export interface MaterialSkill {
+  name: string;
+  icon: string; // relative asset path; feed to itemIconUrl()
+  levels: SkillLevelCost[];
+}
+
+/**
+ * One individually-investable forte node, attached to the active skill (`slot`) whose
+ * tree branch it hangs off (each skill owns two). Either an Inherent Skill
+ * (`kind: "skill"`, no value) or a stat-bonus node (`kind: "stat"`, e.g. CRIT/ATK +value).
+ */
+export interface ForteNode {
+  slot: SkillKey | null; // owning skill branch (null only if the chain couldn't resolve)
+  kind: "skill" | "stat";
+  title: string;
+  icon: string; // relative asset path; feed to itemIconUrl()
+  value: string; // display value, e.g. "1.20%" (empty for inherent skills)
+  consume: CostEntry[];
+}
+
+export interface MaterialCharacter {
+  levelGroup: number;
+  ascension: AscensionTier[];
+  skills: Record<SkillKey, MaterialSkill>;
+  /** One-time forte stat-bonus nodes, individually selectable. */
+  nodes: ForteNode[];
+}
+
+export interface MaterialWeapon {
+  levelId: number;
+  ascension: AscensionTier[];
+  type: number; // weapon-type id (1..5, matches Weapon.type / WEAPON_TYPES)
+}
+
+export interface MaterialItem {
+  name: string;
+  icon: string; // relative asset path; feed to itemIconUrl()
+  rarity: number; // 1..5 (QualityId)
+}
+
+export interface ExpItem {
+  id: number;
+  exp: number;
+  cost: number; // gold per item (weapon exp only; 0 for resonator exp)
+}
+
+export interface MaterialData {
+  version: string;
+  items: Record<string, MaterialItem>;
+  characters: Record<string, MaterialCharacter>;
+  weapons: Record<string, MaterialWeapon>;
+  /** levelGroup -> cumulative resonator EXP to reach each level (index = level). */
+  characterExp: Record<string, number[]>;
+  /** levelId -> cumulative weapon EXP to reach each level (index = level). */
+  weaponExp: Record<string, number[]>;
+  expItems: { role: ExpItem[]; weapon: ExpItem[] };
+}
+
+/** The localized display name for one of the five active-skill slots. */
+export const SKILL_LABELS: Record<SkillKey, string> = {
+  normal: "Basic Attack",
+  skill: "Resonance Skill",
+  circuit: "Forte Circuit",
+  liberation: "Resonance Liberation",
+  intro: "Intro Skill",
+};
+export const SKILL_ORDER: SkillKey[] = ["normal", "skill", "circuit", "liberation", "intro"];
+
+export const SHELL_CREDIT_ID = 2;
+
+let materialCache: MaterialData | null = null;
+
+/** The precomputed material-cost bundle (synchronous — it is bundled, not fetched). */
+export function loadMaterialData(): MaterialData {
+  if (!materialCache) materialCache = materialsBundle as unknown as MaterialData;
+  return materialCache;
+}
+
+/** Convert a bundle item-icon path (already stripped of prefix/extension) to a url. */
+export function itemIconUrl(iconPath: string): string {
+  return iconPath ? `${CDN}/assets/ww/${iconPath}.webp` : "";
+}
+
+/**
+ * Break a total EXP requirement into a count of EXP items, largest tier first,
+ * rounding the remainder up onto the smallest tier. Returns the per-item counts
+ * plus the gold spent (weapon EXP items carry a per-use gold cost).
+ */
+export function expBreakdown(
+  totalExp: number,
+  tiers: ExpItem[]
+): { counts: CostEntry[]; gold: number } {
+  const counts: CostEntry[] = [];
+  let gold = 0;
+  let remaining = Math.max(0, totalExp);
+  const sorted = [...tiers].sort((a, b) => b.exp - a.exp);
+  sorted.forEach((tier, i) => {
+    if (remaining <= 0) return;
+    const isSmallest = i === sorted.length - 1;
+    const n = isSmallest ? Math.ceil(remaining / tier.exp) : Math.floor(remaining / tier.exp);
+    if (n > 0) {
+      counts.push({ id: tier.id, qty: n });
+      gold += n * tier.cost;
+      remaining -= n * tier.exp;
+    }
+  });
+  return { counts, gold };
+}
+
 // ---- loader -------------------------------------------------------------
 
 // v2 adds Character.portrait (the role-pile image) to the cached shape.
 // v3 filters out cosmetic "Projection" weapon skins — bumped to force a refetch.
-const CACHE_KEY = "wwem.gamedata.v3";
+const CACHE_KEY = "wuwa.gamedata.v3";
 
 async function resolveVersion(): Promise<string> {
   try {
