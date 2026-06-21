@@ -14,6 +14,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 -->
 
+## [1.3.1] - 2026-06-21
+
+### Changed
+
+- **Material Calculator → Characters** portraits are larger. The Resonator grid's
+  minimum tile width grew so each portrait fills more of the row, removing the empty
+  space the smaller tiles left behind.
+
 ## [1.3.0] - 2026-06-21
 
 ### Added
@@ -228,7 +236,8 @@ Initial release.
   then cached locally.
 - **Deployment** — static SPA (Vite + React + TypeScript + Tailwind), deployed to GitHub Pages.
 
-[Unreleased]: https://github.com/barleyiced/wuwa-planner/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/barleyiced/wuwa-planner/compare/v1.3.1...HEAD
+[1.3.1]: https://github.com/barleyiced/wuwa-planner/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/barleyiced/wuwa-planner/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/barleyiced/wuwa-planner/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/barleyiced/wuwa-planner/compare/v1.0.0...v1.1.0

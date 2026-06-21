@@ -147,7 +147,7 @@ function CharactersTab({ data, calc }: { data: GameData; calc: CalcApi }) {
           No Resonators yet. Add one to start planning.
         </button>
       ) : (
-        <div className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(118px,1fr))] gap-2.5">
+        <div className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(172px,1fr))] gap-2.5">
           {calc.state.goals.map((goal) => {
             const character = goal.characterId ? data.characterById[goal.characterId] : null;
             return (
