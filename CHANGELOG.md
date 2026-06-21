@@ -33,7 +33,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Waveplate sections (by per-round farming cost), and each category card shows its own
   Waveplate total — with the in-game Waveplate icon — on the right of its header.
   Material tiles show only the icon and remaining count until tapped, where they expand
-  to reveal the name and the owned-count stepper.
+  to reveal the name and the owned-count stepper, and tiles already covered by your
+  inventory ("✓ done") are dimmed. Each card also shows the heads of the Resonators that
+  need that category, so you can tell at a glance who a category is for.
 - **Material Calculator** no longer allows the same Resonator on more than one goal:
   Resonators already added are shown as "Added" and locked out in the Resonator picker
   (both when adding a new goal and when changing an existing one).

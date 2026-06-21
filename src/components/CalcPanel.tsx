@@ -35,10 +35,10 @@ import {
   WeaponIcon,
   WeaponTypeIcon,
 } from "./Icon";
-import { compareByFamily } from "../materials";
+import { compareByFamily, planFarming, type Cat } from "../materials";
 import { Modal } from "./Modal";
 import { FilterChip } from "./CharacterPicker";
-import { MaterialTotals } from "./MaterialTotals";
+import { MaterialTotals, type CategoryContributor } from "./MaterialTotals";
 import { MaterialInventory } from "./MaterialInventory";
 
 /**
@@ -214,6 +214,29 @@ function PlannerTab({ data, calc }: { data: GameData; calc: CalcApi }) {
     [calc.state.goals, data.characterById]
   );
 
+  // Per-category heads: which (included) Resonators need each category's materials.
+  // Each Resonator's own cost is planned against the shared inventory, so `done` means
+  // it has nothing left to farm there — heads not-done first, so "who still needs it"
+  // reads first.
+  const contributors = useMemo<Partial<Record<Cat, CategoryContributor[]>>>(() => {
+    const out: Partial<Record<Cat, CategoryContributor[]>> = {};
+    for (const { goal, char } of built) {
+      if (calc.state.excluded[goal.id]) continue; // only goals that shape the totals
+      const plan = planFarming(goalCost(goal, calc.mat), calc.state.inventory, calc.mat);
+      for (const c of plan.categories) {
+        (out[c.cat] ??= []).push({
+          id: goal.id,
+          name: char.name,
+          icon: char.icon,
+          done: c.remainingItems === 0,
+        });
+      }
+    }
+    for (const cat of Object.keys(out) as Cat[])
+      out[cat]!.sort((a, b) => Number(a.done) - Number(b.done));
+    return out;
+  }, [built, calc.state.excluded, calc.state.inventory, calc.mat]);
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-4 space-y-4">
       <MaterialTotals
@@ -221,6 +244,7 @@ function PlannerTab({ data, calc }: { data: GameData; calc: CalcApi }) {
         inventory={calc.state.inventory}
         mat={calc.mat}
         setOwned={calc.setOwned}
+        contributors={contributors}
         controls={
           built.length > 0 ? (
             <div

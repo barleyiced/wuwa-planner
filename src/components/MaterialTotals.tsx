@@ -5,11 +5,24 @@ import {
   DAILY_WAVEPLATE,
   ROUND_WAVEPLATE,
   planFarming,
+  type Cat,
   type FarmCategory,
   type FarmRow,
 } from "../materials";
-import { ItemIcon, WaveplateIcon } from "./Icon";
+import { AssetImg, ItemIcon, WaveplateIcon } from "./Icon";
 import { CountStepper, TILE_MARK, useCloseOnOutside } from "./MaterialInventory";
+
+/**
+ * A Resonator that needs materials from a given category, shown as a head on the card so
+ * you can see who a category is for. `done` (nothing left to farm there given the shared
+ * inventory) surfaces only in the head's tooltip — done item *tiles* are what get dimmed.
+ */
+export interface CategoryContributor {
+  id: string;
+  name: string;
+  icon: string;
+  done: boolean;
+}
 
 /** "3.2 days" / "<1 day" / "—" from a fractional day count. */
 function daysLabel(days: number): string {
@@ -38,6 +51,7 @@ export function MaterialTotals({
   mat,
   setOwned,
   controls,
+  contributors,
 }: {
   totals: Record<number, number>;
   inventory: Record<number, number>;
@@ -45,6 +59,8 @@ export function MaterialTotals({
   setOwned: (itemId: number, qty: number) => void;
   /** Optional left-hand content for the summary bar (e.g. include-in-totals toggles). */
   controls?: ReactNode;
+  /** Per-category Resonators that need that category's materials (with done state). */
+  contributors?: Partial<Record<Cat, CategoryContributor[]>>;
 }) {
   const plan = useMemo(
     () => planFarming(totals, inventory, mat),
@@ -100,6 +116,7 @@ export function MaterialTotals({
                 <CategoryCard
                   key={c.cat}
                   category={c}
+                  contributors={contributors?.[c.cat]}
                   inventory={inventory}
                   setOwned={setOwned}
                   openId={openId}
@@ -128,12 +145,14 @@ function Stat({ label, value }: { label: string; value: string }) {
 
 function CategoryCard({
   category,
+  contributors,
   inventory,
   setOwned,
   openId,
   setOpenId,
 }: {
   category: FarmCategory;
+  contributors?: CategoryContributor[];
   inventory: Record<number, number>;
   setOwned: (itemId: number, qty: number) => void;
   openId: number | null;
@@ -141,18 +160,33 @@ function CategoryCard({
 }) {
   return (
     <div className="rounded-2xl border border-[var(--color-edge)] bg-[var(--color-panel)]">
-      <div className="flex items-center gap-2 border-b border-[var(--color-edge)] px-3 py-2.5">
-        <h3 className="text-sm font-semibold">{CAT_LABELS[category.cat]}</h3>
-        {category.waveplate > 0 && (
-          <span
-            className="ml-auto flex shrink-0 items-center gap-1 text-xs font-semibold tabular-nums text-slate-300"
-            title={`${fmt(category.waveplate)} Waveplate${
-              category.gated ? " (entry-gated — not counted in the days estimate)" : ""
-            }`}
-          >
-            {fmt(category.waveplate)}
-            <WaveplateIcon className="h-4 w-4" />
-          </span>
+      <div className="border-b border-[var(--color-edge)] px-3 py-2.5">
+        <div className="flex items-center gap-2">
+          <h3 className="text-sm font-semibold">{CAT_LABELS[category.cat]}</h3>
+          {category.waveplate > 0 && (
+            <span
+              className="ml-auto flex shrink-0 items-center gap-1 text-xs font-semibold tabular-nums text-slate-300"
+              title={`${fmt(category.waveplate)} Waveplate${
+                category.gated ? " (entry-gated — not counted in the days estimate)" : ""
+              }`}
+            >
+              {fmt(category.waveplate)}
+              <WaveplateIcon className="h-4 w-4" />
+            </span>
+          )}
+        </div>
+        {contributors && contributors.length > 0 && (
+          <div className="mt-2 flex flex-wrap items-center gap-1">
+            {contributors.map((c) => (
+              <span
+                key={c.id}
+                title={`${c.name} — ${c.done ? "covered by inventory" : "still needs to farm"}`}
+                className="h-6 w-6 overflow-hidden rounded-full border border-[var(--color-edge)]"
+              >
+                <AssetImg src={c.icon} alt={c.name} className="h-full w-full object-cover" />
+              </span>
+            ))}
+          </div>
         )}
       </div>
       <div className="grid grid-cols-[repeat(auto-fill,minmax(72px,1fr))] gap-2 p-2.5">
@@ -195,7 +229,7 @@ function MatTile({
       {...{ [TILE_MARK]: "" }}
       className={`flex flex-col items-center gap-1.5 rounded-xl border bg-[var(--color-panel)] p-2 transition ${
         open ? "col-span-2 border-sky-500/60" : "border-[var(--color-edge)]"
-      }`}
+      } ${done && !open ? "opacity-40" : ""}`}
     >
       <button
         onClick={() => setOpenId(open ? null : row.id)}
