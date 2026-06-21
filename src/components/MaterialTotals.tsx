@@ -244,7 +244,7 @@ function MatTile({
     <div
       {...{ [TILE_MARK]: "" }}
       className={`flex flex-col items-center gap-1.5 rounded-xl border bg-[var(--color-panel)] p-2 transition ${
-        open ? "col-span-2 border-sky-500/60" : "border-[var(--color-edge)]"
+        open ? "col-span-2 border-cyan-500/60" : "border-[var(--color-edge)]"
       } ${done && !open ? "opacity-40" : ""}`}
     >
       <button

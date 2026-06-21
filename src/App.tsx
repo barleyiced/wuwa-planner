@@ -65,7 +65,7 @@ export function App() {
   const needsData = ui.route === "matrix" || ui.route === "calc";
 
   return (
-    <div className="flex min-h-full">
+    <div className="grid-bg flex min-h-full">
       <Sidebar
         route={ui.route}
         setRoute={setRoute}
@@ -108,7 +108,7 @@ export function App() {
 function Loading() {
   return (
     <div className="mx-auto mt-24 flex max-w-xs flex-col items-center gap-3 text-slate-400">
-      <div className="h-8 w-8 animate-spin rounded-full border-2 border-sky-500/30 border-t-sky-400" />
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-cyan-500/30 border-t-cyan-400" />
       <p className="text-sm">Loading Resonators &amp; weapons…</p>
     </div>
   );

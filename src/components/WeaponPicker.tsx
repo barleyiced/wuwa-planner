@@ -57,7 +57,7 @@ export function WeaponPicker({
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder={`Search ${WEAPON_TYPES[character.weaponType]}…`}
-          className="w-full rounded-lg border border-[var(--color-edge)] bg-[var(--color-panel2)] px-3 py-2 text-sm outline-none placeholder:text-slate-500 focus:border-sky-500"
+          className="w-full rounded-lg border border-[var(--color-edge)] bg-[var(--color-panel2)] px-3 py-2 text-sm outline-none placeholder:text-slate-500 focus:border-cyan-500"
         />
         <div className="flex flex-wrap items-center gap-1.5">
           {[5, 4, 3].map((r) => (

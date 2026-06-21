@@ -36,15 +36,15 @@ export function Sidebar({
 }) {
   return (
     <aside
-      className={`sticky top-0 z-30 flex h-screen shrink-0 flex-col border-r border-[var(--color-edge)] bg-[var(--color-panel)] transition-[width] duration-200 ${
+      className={`sticky top-0 z-30 flex h-screen shrink-0 flex-col border-r border-[var(--color-edge)] bg-[var(--color-panel)] shadow-[1px_0_0_color-mix(in_oklab,var(--color-accent)_18%,transparent)] transition-[width] duration-200 ${
         collapsed ? "w-14" : "w-60"
       }`}
     >
-      <div className="flex items-center gap-2 px-3 py-3">
+      <div className="flex items-center gap-2 px-3 py-4">
         <Logo />
         {!collapsed && (
           <div className="min-w-0 leading-tight">
-            <div className="truncate text-sm font-semibold">WuWa Planner</div>
+            <div className="tech-head truncate text-xs font-bold">WuWa Planner</div>
             <div className="truncate text-[10px] text-slate-500">
               Wuthering Waves {version ? `· ${version}` : ""}
             </div>
@@ -58,12 +58,15 @@ export function Sidebar({
             key={item.route}
             onClick={() => setRoute(item.route)}
             title={collapsed ? item.label : undefined}
-            className={`flex items-center gap-3 rounded-lg px-2.5 py-2 text-sm font-medium transition ${
+            className={`clip-corner-sm relative flex items-center gap-3 px-2.5 py-2 text-sm font-medium transition ${
               route === item.route
-                ? "bg-sky-500/15 text-sky-300"
+                ? "bg-cyan-400/12 text-cyan-200 shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--color-accent)_35%,transparent)]"
                 : "text-slate-300 hover:bg-white/5"
             } ${collapsed ? "justify-center" : ""}`}
           >
+            {route === item.route && (
+              <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 bg-gradient-to-b from-[var(--color-accent)] to-[var(--color-accent2)] shadow-[0_0_8px_var(--color-accent)]" />
+            )}
             <span className="shrink-0">{item.icon}</span>
             {!collapsed && <span className="truncate">{item.label}</span>}
           </button>
@@ -242,11 +245,11 @@ const I = "h-5 w-5";
 function Logo() {
   return (
     <svg viewBox="0 0 32 32" className="h-7 w-7 shrink-0">
-      <rect width="32" height="32" rx="7" fill="#0e1422" stroke="#243049" />
+      <rect width="32" height="32" rx="7" fill="#0b1220" stroke="#1d3148" />
       <path
         d="M5 11l4 12 3-9 3 9 3-9 3 9 4-12"
         fill="none"
-        stroke="#5bd6ff"
+        stroke="#5fe6e0"
         strokeWidth="2.4"
         strokeLinejoin="round"
         strokeLinecap="round"

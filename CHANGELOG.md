@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+<!-- Add changes for the next release here. Suggested headings:
+### Added
+### Changed
+### Fixed
+### Removed
+-->
+
+## [1.3.0] - 2026-06-21
+
 ### Added
 
 - **Endstate Matrix → Sonata sets.** Each resonator slot on a team card now carries a
@@ -25,6 +34,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Holographic visual refresh.** The whole app adopts a Wuthering Waves-style endgame
+  look: angular notched panels with thin glowing cyan/gold edges, a faint geometric grid
+  background, wide uppercase "tech" headers and tabs, and a hover light-sweep on cards.
+  The accent color moves from sky-blue to the game's cyan, Endstate Matrix team slots
+  gain an element-colored top accent, and the primary actions use a notched holo button.
+  Styling only — no plan data, calculator state, or storage formats changed.
 - **Export / Import now cover both tools.** The sidebar "Data" menu's Export and Import
   (renamed from "Export/Import plan") write and restore a single file containing both the
   Endstate Matrix (teams + weapon inventory) and the Material Calculator (goals, owned
@@ -40,13 +55,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Material Calculator** no longer allows the same Resonator on more than one goal:
   Resonators already added are shown as "Added" and locked out in the Resonator picker
   (both when adding a new goal and when changing an existing one).
-
-<!-- Add more changes for the next release here. Suggested headings:
-### Added
-### Changed
-### Fixed
-### Removed
--->
 
 ## [1.2.0] - 2026-06-21
 
@@ -220,7 +228,8 @@ Initial release.
   then cached locally.
 - **Deployment** — static SPA (Vite + React + TypeScript + Tailwind), deployed to GitHub Pages.
 
-[Unreleased]: https://github.com/barleyiced/wuwa-planner/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/barleyiced/wuwa-planner/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/barleyiced/wuwa-planner/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/barleyiced/wuwa-planner/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/barleyiced/wuwa-planner/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/barleyiced/wuwa-planner/releases/tag/v1.0.0

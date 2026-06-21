@@ -89,7 +89,7 @@ export function MaterialInventory({
             onClick={() => setCat(cat === c ? null : c)}
             className={`rounded-lg px-2.5 py-1 text-xs font-medium transition ${
               cat === c
-                ? "bg-sky-500 text-white"
+                ? "bg-cyan-500 text-white"
                 : "bg-[var(--color-panel2)] text-slate-300 hover:bg-white/5"
             }`}
           >
@@ -100,7 +100,7 @@ export function MaterialInventory({
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search materials…"
-          className="ml-auto w-48 rounded-lg border border-[var(--color-edge)] bg-[var(--color-panel2)] px-3 py-1.5 text-sm outline-none placeholder:text-slate-500 focus:border-sky-500"
+          className="ml-auto w-48 rounded-lg border border-[var(--color-edge)] bg-[var(--color-panel2)] px-3 py-1.5 text-sm outline-none placeholder:text-slate-500 focus:border-cyan-500"
         />
       </div>
 
@@ -151,7 +151,7 @@ function InvTile({
     <div
       {...{ [TILE_MARK]: "" }}
       className={`flex flex-col items-center gap-1.5 rounded-xl border bg-[var(--color-panel)] p-2 transition ${
-        open ? "col-span-2 border-sky-500/60" : "border-[var(--color-edge)]"
+        open ? "col-span-2 border-cyan-500/60" : "border-[var(--color-edge)]"
       }`}
     >
       <button
@@ -193,7 +193,7 @@ export function CountStepper({
 }) {
   const set = (v: number) => onChange(Math.max(0, Number.isFinite(v) ? v : 0));
   return (
-    <div className="flex w-full items-center overflow-hidden rounded-lg border border-[var(--color-edge)] bg-[var(--color-panel2)] focus-within:border-sky-500">
+    <div className="flex w-full items-center overflow-hidden rounded-lg border border-[var(--color-edge)] bg-[var(--color-panel2)] focus-within:border-cyan-500">
       <button
         onClick={() => set(value - 1)}
         disabled={value <= 0}

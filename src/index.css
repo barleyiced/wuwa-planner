@@ -1,10 +1,12 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg: #070a14;
-  --color-panel: #0e1422;
-  --color-panel2: #141c30;
-  --color-edge: #243049;
+  --color-bg: #060a14;
+  --color-panel: #0b1220;
+  --color-panel2: #111c30;
+  --color-edge: #1d3148;
+  --color-accent: #5fe6e0; /* holo cyan */
+  --color-accent2: #eccb86; /* holo gold */
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 }
 
@@ -33,13 +35,185 @@ body {
 /* thin scrollbars */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #2a3756 transparent;
+  scrollbar-color: #243a55 transparent;
 }
 *::-webkit-scrollbar {
   width: 9px;
   height: 9px;
 }
 *::-webkit-scrollbar-thumb {
-  background: #2a3756;
+  background: #243a55;
   border-radius: 9px;
+}
+
+@layer components {
+  /* ---- Holographic UI kit (Wuthering Waves-style) ----
+     The game UI leans on angular notched panels, thin glowing cyan/gold edges,
+     a faint geometric grid, and wide uppercase tech labels. These reusable
+     classes encode that language so components stay terse. */
+
+  /* Angular clipped corners: cut top-left + bottom-right (the classic WuWa cut). */
+  .clip-corner {
+    --notch: 13px;
+    clip-path: polygon(
+      var(--notch) 0,
+      100% 0,
+      100% calc(100% - var(--notch)),
+      calc(100% - var(--notch)) 100%,
+      0 100%,
+      0 var(--notch)
+    );
+  }
+  .clip-corner-sm {
+    --notch: 8px;
+    clip-path: polygon(
+      var(--notch) 0,
+      100% 0,
+      100% calc(100% - var(--notch)),
+      calc(100% - var(--notch)) 100%,
+      0 100%,
+      0 var(--notch)
+    );
+  }
+
+  /* Notched panel with a glowing gradient edge. A ::before sits 1px larger
+     behind the opaque panel so it peeks out as a thin cyan→gold hairline that
+     also traces the diagonal cuts (the panel's own clip can't show a border). */
+  .holo-panel {
+    --notch: 13px;
+    position: relative;
+    isolation: isolate;
+    background: var(--color-panel);
+    clip-path: polygon(
+      var(--notch) 0,
+      100% 0,
+      100% calc(100% - var(--notch)),
+      calc(100% - var(--notch)) 100%,
+      0 100%,
+      0 var(--notch)
+    );
+  }
+  .holo-panel::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    z-index: -1;
+    background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-accent) 60%, transparent) 0%,
+      var(--color-edge) 42%,
+      var(--color-edge) 58%,
+      color-mix(in oklab, var(--color-accent2) 55%, transparent) 100%
+    );
+    clip-path: polygon(
+      var(--notch) 0,
+      100% 0,
+      100% calc(100% - var(--notch)),
+      calc(100% - var(--notch)) 100%,
+      0 100%,
+      0 var(--notch)
+    );
+    transition: background 0.25s ease, filter 0.25s ease;
+  }
+  /* Interactive panels brighten their edge + add a soft outer glow on hover. */
+  .holo-interactive {
+    transition: transform 0.18s ease;
+  }
+  .holo-interactive:hover {
+    transform: translateY(-2px);
+  }
+  .holo-interactive:hover.holo-panel::before,
+  .holo-interactive.holo-panel:hover::before {
+    background: linear-gradient(
+      135deg,
+      var(--color-accent) 0%,
+      color-mix(in oklab, var(--color-accent) 40%, var(--color-edge)) 45%,
+      var(--color-accent2) 100%
+    );
+    filter: drop-shadow(0 0 6px color-mix(in oklab, var(--color-accent) 45%, transparent));
+  }
+
+  /* Force the bright accent edge (e.g. a drag drop-target). */
+  .holo-edge-bright::before {
+    background: linear-gradient(135deg, var(--color-accent), var(--color-accent2)) !important;
+    filter: drop-shadow(0 0 9px color-mix(in oklab, var(--color-accent) 55%, transparent));
+  }
+
+  /* Diagonal light sweep that wipes across a panel on hover. */
+  .holo-sheen {
+    position: relative;
+    overflow: hidden;
+  }
+  .holo-sheen::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      115deg,
+      transparent 30%,
+      color-mix(in oklab, var(--color-accent) 14%, transparent) 48%,
+      transparent 66%
+    );
+    transform: translateX(-120%);
+    transition: transform 0.6s ease;
+    pointer-events: none;
+  }
+  .holo-sheen:hover::after {
+    transform: translateX(120%);
+  }
+
+  /* Wide uppercase tech label with a leading accent tick. */
+  .tech-head {
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+  }
+  .tech-tick {
+    position: relative;
+    padding-left: 0.85rem;
+  }
+  .tech-tick::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    height: 1.05em;
+    width: 3px;
+    transform: translateY(-50%);
+    background: linear-gradient(var(--color-accent), var(--color-accent2));
+    box-shadow: 0 0 8px color-mix(in oklab, var(--color-accent) 60%, transparent);
+  }
+
+  /* Faint geometric grid wash for the app background. */
+  .grid-bg {
+    background-image:
+      linear-gradient(color-mix(in oklab, var(--color-edge) 32%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in oklab, var(--color-edge) 32%, transparent) 1px, transparent 1px),
+      radial-gradient(
+        circle at 18% 0%,
+        color-mix(in oklab, var(--color-accent) 9%, transparent),
+        transparent 45%
+      );
+    background-size: 46px 46px, 46px 46px, 100% 100%;
+    background-attachment: fixed;
+  }
+
+  /* Primary holo action button. */
+  .btn-holo {
+    --notch: 8px;
+    clip-path: polygon(
+      var(--notch) 0,
+      100% 0,
+      100% calc(100% - var(--notch)),
+      calc(100% - var(--notch)) 100%,
+      0 100%,
+      0 var(--notch)
+    );
+    background: linear-gradient(120deg, var(--color-accent), color-mix(in oklab, var(--color-accent) 70%, #1bb6c8));
+    color: #04212a;
+    transition: filter 0.18s ease, box-shadow 0.18s ease;
+  }
+  .btn-holo:not(:disabled):hover {
+    filter: brightness(1.08);
+    box-shadow: 0 0 16px color-mix(in oklab, var(--color-accent) 45%, transparent);
+  }
 }

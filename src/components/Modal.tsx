@@ -26,12 +26,12 @@ export function Modal({
       onMouseDown={onClose}
     >
       <div
-        className={`my-0 flex max-h-[100dvh] w-full ${maxWidthClass} flex-col overflow-hidden rounded-t-2xl border border-[var(--color-edge)] bg-[var(--color-panel)] shadow-2xl sm:my-auto sm:max-h-[90dvh] sm:rounded-2xl`}
+        className={`my-0 flex max-h-[100dvh] w-full ${maxWidthClass} flex-col overflow-hidden rounded-t-2xl border border-t-2 border-[var(--color-edge)] border-t-[var(--color-accent)] bg-[var(--color-panel)] shadow-2xl shadow-[0_0_40px_-12px_color-mix(in_oklab,var(--color-accent)_45%,transparent)] sm:my-auto sm:max-h-[90dvh] sm:rounded-2xl`}
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <div className="flex shrink-0 items-center justify-between gap-3 border-b border-[var(--color-edge)] px-5 py-3">
+        <div className="flex shrink-0 items-center justify-between gap-3 border-b border-[var(--color-edge)] bg-gradient-to-b from-[color-mix(in_oklab,var(--color-accent)_8%,transparent)] to-transparent px-5 py-3">
           <div className="min-w-0">
-            <h2 className="truncate text-base font-semibold">{title}</h2>
+            <h2 className="tech-head truncate text-sm font-bold">{title}</h2>
             {subtitle && <div className="truncate text-xs text-slate-400">{subtitle}</div>}
           </div>
           <button

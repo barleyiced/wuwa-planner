@@ -57,11 +57,11 @@ export function CalcPanel({ data, calc }: { data: GameData; calc: CalcApi }) {
 
   return (
     <div>
-      <div className="border-b border-[var(--color-edge)]">
+      <div className="border-b border-[var(--color-edge)] bg-gradient-to-b from-[color-mix(in_oklab,var(--color-accent)_5%,transparent)] to-transparent">
         <div className="mx-auto max-w-7xl px-4 pt-4">
           <div className="leading-tight">
-            <h1 className="text-lg font-semibold">Material Calculator</h1>
-            <p className="hidden text-xs text-slate-500 sm:block">
+            <h1 className="tech-head tech-tick text-base font-bold">Material Calculator</h1>
+            <p className="mt-1.5 hidden pl-[0.85rem] text-xs text-slate-500 sm:block">
               Plan upgrades, track what you own, and see what's left to farm.
             </p>
           </div>
@@ -105,9 +105,9 @@ function TabBtn({
   return (
     <button
       onClick={onClick}
-      className={`relative border-b-2 px-4 pb-2.5 text-sm font-semibold transition ${
+      className={`tech-head relative border-b-2 px-4 pb-2.5 text-xs font-bold transition ${
         active
-          ? "border-sky-400 text-sky-300"
+          ? "border-cyan-400 text-cyan-300 drop-shadow-[0_0_6px_color-mix(in_oklab,var(--color-accent)_55%,transparent)]"
           : "border-transparent text-slate-400 hover:text-slate-200"
       }`}
     >
@@ -141,7 +141,7 @@ function CharactersTab({ data, calc }: { data: GameData; calc: CalcApi }) {
       {calc.state.goals.length === 0 ? (
         <button
           onClick={() => setAdding(true)}
-          className="mt-4 flex w-full flex-col items-center gap-1 rounded-2xl border border-dashed border-[var(--color-edge)] p-10 text-center text-sm text-slate-500 transition hover:border-sky-500/60 hover:text-sky-300"
+          className="mt-4 flex w-full flex-col items-center gap-1 rounded-2xl border border-dashed border-[var(--color-edge)] p-10 text-center text-sm text-slate-500 transition hover:border-cyan-500/60 hover:text-cyan-300"
         >
           <span className="text-3xl leading-none">+</span>
           No Resonators yet. Add one to start planning.
@@ -154,7 +154,7 @@ function CharactersTab({ data, calc }: { data: GameData; calc: CalcApi }) {
               <button
                 key={goal.id}
                 onClick={() => setOpenId(goal.id)}
-                className="overflow-hidden rounded-xl border border-[var(--color-edge)] transition hover:-translate-y-0.5 hover:border-sky-500/60"
+                className="overflow-hidden rounded-xl border border-[var(--color-edge)] transition hover:-translate-y-0.5 hover:border-cyan-500/60"
                 title={character ? character.name : "Choose a Resonator"}
               >
                 {character ? (
@@ -170,7 +170,7 @@ function CharactersTab({ data, calc }: { data: GameData; calc: CalcApi }) {
           {!atCap && (
             <button
               onClick={() => setAdding(true)}
-              className="flex aspect-[3/4] w-full flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-[var(--color-edge)] text-slate-500 transition hover:border-sky-500/60 hover:text-sky-300"
+              className="flex aspect-[3/4] w-full flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-[var(--color-edge)] text-slate-500 transition hover:border-cyan-500/60 hover:text-cyan-300"
             >
               <span className="text-3xl leading-none">+</span>
               <span className="text-xs">Add</span>
@@ -284,7 +284,7 @@ function GoalToggle({
       title={`${char.name} — ${included ? "counted (tap to exclude)" : "excluded (tap to include)"}`}
       className={`relative h-9 w-9 shrink-0 overflow-hidden rounded-full border transition ${
         included
-          ? "border-sky-500/60 ring-1 ring-sky-400/40"
+          ? "border-cyan-500/60 ring-1 ring-cyan-400/40"
           : "border-[var(--color-edge)] opacity-40 grayscale hover:opacity-70"
       }`}
     >
@@ -495,7 +495,7 @@ function GoalSubTab({
     <button
       onClick={onClick}
       className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
-        active ? "bg-sky-500 text-white" : "text-slate-300 hover:bg-white/5"
+        active ? "bg-cyan-500 text-white" : "text-slate-300 hover:bg-white/5"
       }`}
     >
       {children}
@@ -571,7 +571,7 @@ function SkillsTab({
         {character.nodes.length > 0 && (
           <button
             onClick={() => calc.setAllNodes(goal.id, !allOn, character.nodes.length)}
-            className="text-xs text-sky-300 hover:text-sky-200"
+            className="text-xs text-cyan-300 hover:text-cyan-200"
           >
             {allOn ? "Clear all nodes" : "Select all nodes"}
           </button>
@@ -666,7 +666,7 @@ function NodeSquare({
       aria-pressed={on}
       className={`flex w-[3.75rem] shrink-0 flex-col items-center justify-center gap-1 rounded-xl border px-1 transition ${
         on
-          ? "border-sky-500/60 bg-sky-500/10"
+          ? "border-cyan-500/60 bg-cyan-500/10"
           : "border-[var(--color-edge)] bg-[var(--color-panel2)] opacity-45 hover:opacity-80"
       }`}
     >
@@ -778,7 +778,7 @@ function StopSelect({
       <select
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="min-w-[4.25rem] cursor-pointer appearance-none rounded-lg border border-[var(--color-edge)] bg-[var(--color-panel2)] py-1.5 pl-3 pr-7 text-sm font-semibold tabular-nums text-slate-100 outline-none transition hover:border-slate-500 focus:border-sky-500 focus:ring-1 focus:ring-sky-500/40"
+        className="min-w-[4.25rem] cursor-pointer appearance-none rounded-lg border border-[var(--color-edge)] bg-[var(--color-panel2)] py-1.5 pl-3 pr-7 text-sm font-semibold tabular-nums text-slate-100 outline-none transition hover:border-slate-500 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/40"
       >
         {LEVEL_STOPS.map((s, i) => (
           <option key={i} value={i}>
@@ -849,7 +849,7 @@ function CalcCharacterPicker({
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search Resonators…"
-          className="w-full rounded-lg border border-[var(--color-edge)] bg-[var(--color-panel2)] px-3 py-2 text-sm outline-none placeholder:text-slate-500 focus:border-sky-500"
+          className="w-full rounded-lg border border-[var(--color-edge)] bg-[var(--color-panel2)] px-3 py-2 text-sm outline-none placeholder:text-slate-500 focus:border-cyan-500"
         />
         <div className="flex flex-wrap gap-1.5">
           {Object.entries(ELEMENTS).map(([id, el]) => {
@@ -902,8 +902,8 @@ function CalcCharacterPicker({
                 isTaken
                   ? "cursor-not-allowed border-[var(--color-edge)] opacity-40"
                   : c.id === current
-                    ? "border-sky-400 ring-2 ring-sky-400/50 hover:-translate-y-0.5"
-                    : "border-[var(--color-edge)] hover:-translate-y-0.5 hover:border-sky-500/60"
+                    ? "border-cyan-400 ring-2 ring-cyan-400/50 hover:-translate-y-0.5"
+                    : "border-[var(--color-edge)] hover:-translate-y-0.5 hover:border-cyan-500/60"
               }`}
             >
               <CharPortrait char={c} />
@@ -962,7 +962,7 @@ function CalcWeaponPicker({
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder={`Search ${WEAPON_TYPES[weaponType]}…`}
-          className="w-full rounded-lg border border-[var(--color-edge)] bg-[var(--color-panel2)] px-3 py-2 text-sm outline-none placeholder:text-slate-500 focus:border-sky-500"
+          className="w-full rounded-lg border border-[var(--color-edge)] bg-[var(--color-panel2)] px-3 py-2 text-sm outline-none placeholder:text-slate-500 focus:border-cyan-500"
         />
         <div className="flex flex-wrap items-center gap-1.5">
           {[5, 4, 3].map((r) => (
@@ -994,8 +994,8 @@ function CalcWeaponPicker({
             }}
             className={`flex items-center gap-3 rounded-xl border px-3 py-2 text-left transition ${
               w.id === current
-                ? "border-sky-400 ring-1 ring-sky-400/40"
-                : "border-[var(--color-edge)] bg-[var(--color-panel2)] hover:-translate-y-0.5 hover:border-sky-500/60"
+                ? "border-cyan-400 ring-1 ring-cyan-400/40"
+                : "border-[var(--color-edge)] bg-[var(--color-panel2)] hover:-translate-y-0.5 hover:border-cyan-500/60"
             }`}
           >
             <WeaponIcon weapon={w} size="sm" />

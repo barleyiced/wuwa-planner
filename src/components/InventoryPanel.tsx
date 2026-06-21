@@ -38,8 +38,8 @@ export function InventoryPanel({ data, plan }: { data: GameData; plan: PlanApi }
     <div className="mx-auto max-w-7xl px-4 py-5">
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <div>
-          <h2 className="text-lg font-semibold">Weapon inventory</h2>
-          <p className="text-xs text-slate-400">
+          <h2 className="tech-head tech-tick text-sm font-bold">Weapon inventory</h2>
+          <p className="mt-1 pl-[0.85rem] text-xs text-slate-400">
             {totals.distinct} distinct · {totals.copies} copies owned
             {totals.over > 0 && (
               <span className="text-amber-400"> · {totals.over} over-assigned</span>
@@ -53,7 +53,7 @@ export function InventoryPanel({ data, plan }: { data: GameData; plan: PlanApi }
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search weapons…"
-          className="w-full rounded-lg border border-[var(--color-edge)] bg-[var(--color-panel2)] px-3 py-2 text-sm outline-none placeholder:text-slate-500 focus:border-sky-500"
+          className="w-full rounded-lg border border-[var(--color-edge)] bg-[var(--color-panel2)] px-3 py-2 text-sm outline-none placeholder:text-slate-500 focus:border-cyan-500"
         />
         <div className="flex flex-wrap items-center gap-1.5">
           {Object.entries(WEAPON_TYPES).map(([id, name]) => {

@@ -55,7 +55,7 @@ export function SonataPicker({
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search Sonata sets…"
-          className="w-full rounded-lg border border-[var(--color-edge)] bg-[var(--color-panel2)] px-3 py-2 text-sm outline-none placeholder:text-slate-500 focus:border-sky-500"
+          className="w-full rounded-lg border border-[var(--color-edge)] bg-[var(--color-panel2)] px-3 py-2 text-sm outline-none placeholder:text-slate-500 focus:border-cyan-500"
         />
         {selected.length > 0 && (
           <button
@@ -77,7 +77,7 @@ export function SonataPicker({
             <div
               key={s.id}
               className={`flex items-center gap-2.5 rounded-xl border px-2.5 py-2 transition ${
-                pick ? "border-sky-400/70 bg-sky-400/10" : "border-[var(--color-edge)]"
+                pick ? "border-cyan-400/70 bg-cyan-400/10" : "border-[var(--color-edge)]"
               }`}
             >
               <SonataIcon sonata={s} className="h-8 w-8" />
@@ -103,10 +103,10 @@ export function SonataPicker({
                       }
                       className={`min-w-[2.1rem] rounded-md border px-1.5 py-1 text-[11px] font-semibold transition ${
                         active
-                          ? "border-sky-400 bg-sky-400 text-slate-900"
+                          ? "border-cyan-400 bg-cyan-400 text-slate-900"
                           : disabled
                           ? "cursor-not-allowed border-[var(--color-edge)] text-slate-500 opacity-40"
-                          : "border-[var(--color-edge)] text-slate-300 hover:border-sky-500/60 hover:bg-white/5"
+                          : "border-[var(--color-edge)] text-slate-300 hover:border-cyan-500/60 hover:bg-white/5"
                       }`}
                     >
                       {tier}pc

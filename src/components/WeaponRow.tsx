@@ -57,7 +57,7 @@ export function WeaponRow({
 
   if (layout === "card") {
     return (
-      <div className="flex flex-col items-center gap-2 rounded-xl border border-[var(--color-edge)] bg-[var(--color-panel2)] px-3 py-3 text-center">
+      <div className="clip-corner-sm flex flex-col items-center gap-2 border border-[var(--color-edge)] bg-[var(--color-panel2)] px-3 py-3 text-center transition hover:border-cyan-500/50 hover:shadow-[inset_0_0_22px_color-mix(in_oklab,var(--color-accent)_12%,transparent)]">
         <WeaponIcon weapon={weapon} size="lg" />
         <div className="min-w-0 w-full">
           <div className="truncate text-sm font-medium">{weapon.name}</div>
@@ -119,9 +119,9 @@ export function WeaponRow({
           disabled={!canEquip && !equip.equipped}
           className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
             equip.equipped
-              ? "bg-sky-500 text-white"
+              ? "bg-cyan-500 text-white"
               : canEquip
-              ? "border border-sky-500/60 text-sky-300 hover:bg-sky-500/15"
+              ? "border border-cyan-500/60 text-cyan-300 hover:bg-cyan-500/15"
               : "cursor-not-allowed border border-[var(--color-edge)] text-slate-600"
           }`}
         >

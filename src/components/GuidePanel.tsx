@@ -73,7 +73,7 @@ export function GuidePanel({ onStart }: { onStart: () => void }) {
 
         <button
           onClick={onStart}
-          className="rounded-lg bg-sky-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-400"
+          className="rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-cyan-400"
         >
           Start planning →
         </button>
@@ -85,7 +85,7 @@ export function GuidePanel({ onStart }: { onStart: () => void }) {
 function Step({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
   return (
     <div className="flex gap-3">
-      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-sky-500/15 text-sm font-semibold text-sky-300">
+      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cyan-500/15 text-sm font-semibold text-cyan-300">
         {n}
       </div>
       <div className="min-w-0">
@@ -105,7 +105,7 @@ function Kbd({ children }: { children: React.ReactNode }) {
 }
 
 function Tab({ children }: { children: React.ReactNode }) {
-  return <span className="font-semibold text-sky-300">{children}</span>;
+  return <span className="font-semibold text-cyan-300">{children}</span>;
 }
 
 function Slotish({ children }: { children: React.ReactNode }) {
@@ -118,7 +118,7 @@ function Slotish({ children }: { children: React.ReactNode }) {
 
 function Note({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mt-2 rounded-lg border-l-2 border-sky-500/60 bg-sky-500/5 px-3 py-2 text-xs text-slate-400">
+    <div className="mt-2 rounded-lg border-l-2 border-cyan-500/60 bg-cyan-500/5 px-3 py-2 text-xs text-slate-400">
       💡 {children}
     </div>
   );

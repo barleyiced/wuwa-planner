@@ -4,7 +4,10 @@ export function HomePanel({ onNavigate }: { onNavigate: (r: Route) => void }) {
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:py-14">
       <div className="text-center">
-        <h1 className="bg-gradient-to-r from-sky-300 to-cyan-200 bg-clip-text text-3xl font-bold text-transparent sm:text-4xl">
+        <div className="tech-head mb-3 text-[11px] font-semibold text-cyan-300/70">
+          ◢ Resonance Toolkit ◣
+        </div>
+        <h1 className="bg-gradient-to-r from-cyan-200 via-cyan-300 to-[var(--color-accent2)] bg-clip-text text-3xl font-bold tracking-tight text-transparent drop-shadow-[0_0_18px_color-mix(in_oklab,var(--color-accent)_30%,transparent)] sm:text-4xl">
           Wuthering Waves Planner
         </h1>
         <p className="mx-auto mt-3 max-w-xl text-sm text-slate-400">
@@ -52,18 +55,18 @@ function ToolCard({
   return (
     <button
       onClick={onClick}
-      className="group flex flex-col rounded-2xl border border-[var(--color-edge)] bg-[var(--color-panel)] p-5 text-left transition hover:-translate-y-0.5 hover:border-sky-500/60"
+      className="holo-panel holo-interactive holo-sheen group flex flex-col p-5 text-left"
     >
       <div className="flex items-center gap-2">
-        <h2 className="text-lg font-semibold">{title}</h2>
+        <h2 className="tech-head tech-tick text-sm font-bold">{title}</h2>
         {badge && (
-          <span className="rounded-full bg-sky-500/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-sky-300">
+          <span className="clip-corner-sm bg-cyan-400/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-cyan-200">
             {badge}
           </span>
         )}
       </div>
-      <p className="mt-2 flex-1 text-sm text-slate-400">{blurb}</p>
-      <span className="mt-4 text-sm font-medium text-sky-300 group-hover:text-sky-200">
+      <p className="mt-3 flex-1 text-sm text-slate-400">{blurb}</p>
+      <span className="mt-4 text-sm font-semibold text-cyan-300 transition group-hover:text-cyan-200">
         {cta} →
       </span>
     </button>

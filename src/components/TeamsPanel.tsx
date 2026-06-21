@@ -63,8 +63,8 @@ export function TeamsPanel({ data, plan }: { data: GameData; plan: PlanApi }) {
     <div className="mx-auto max-w-7xl px-4 py-5">
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold">Teams</h2>
-          <p className="text-xs text-slate-400">
+          <h2 className="tech-head tech-tick text-sm font-bold">Teams</h2>
+          <p className="mt-1 pl-[0.85rem] text-xs text-slate-400">
             {plan.state.teams.length} / {MAX_TEAMS} teams · drag a card by its handle to reorder ·
             weapons can't be shared beyond owned copies
           </p>
@@ -72,7 +72,7 @@ export function TeamsPanel({ data, plan }: { data: GameData; plan: PlanApi }) {
         <button
           onClick={plan.addTeam}
           disabled={plan.state.teams.length >= MAX_TEAMS}
-          className="rounded-lg bg-sky-500 px-3 py-2 text-sm font-semibold text-white transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-40"
+          className="btn-holo px-4 py-2 text-sm font-bold tracking-wide disabled:cursor-not-allowed disabled:opacity-40"
         >
           + Add team
         </button>
@@ -202,11 +202,9 @@ function TeamCard({
         setArmed(false);
         onDragEndCard();
       }}
-      className={`rounded-2xl border bg-[var(--color-panel)] p-3 transition ${
-        isDropTarget
-          ? "border-sky-400 ring-2 ring-sky-400/60"
-          : "border-[var(--color-edge)]"
-      } ${isDragging ? "opacity-40" : ""}`}
+      className={`holo-panel p-3 ${isDropTarget ? "holo-edge-bright" : ""} ${
+        isDragging ? "opacity-40" : ""
+      }`}
     >
       <div className="mb-2 flex items-center gap-2">
         <button
@@ -302,10 +300,10 @@ function Slot({
     return (
       <button
         onClick={onEditChar}
-        className="flex aspect-[3/4] flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-[var(--color-edge)] text-slate-500 transition hover:border-sky-500/60 hover:text-sky-300"
+        className="clip-corner-sm flex aspect-[3/4] flex-col items-center justify-center gap-1 border border-dashed border-[var(--color-edge)] text-slate-500 transition hover:border-cyan-500/60 hover:text-cyan-300 hover:shadow-[inset_0_0_18px_color-mix(in_oklab,var(--color-accent)_14%,transparent)]"
       >
         <span className="text-2xl leading-none">+</span>
-        <span className="text-[10px]">Resonator</span>
+        <span className="tech-head text-[9px]">Resonator</span>
       </button>
     );
   }
@@ -313,11 +311,16 @@ function Slot({
   const el = elementOf(char.element);
   return (
     <div
-      className={`group relative flex flex-col items-center gap-1.5 rounded-xl border p-2 ${
+      className={`clip-corner-sm group relative flex flex-col items-center gap-1.5 border p-2 ${
         overVigor
           ? "border-amber-500/70 bg-amber-500/5"
           : "border-[var(--color-edge)] bg-[var(--color-panel2)]"
       }`}
+      style={
+        overVigor
+          ? undefined
+          : { boxShadow: `inset 0 2px 0 0 ${el.color ?? "transparent"}, inset 0 22px 26px -22px ${el.color ?? "transparent"}` }
+      }
     >
       <button
         onClick={onClear}
@@ -348,7 +351,7 @@ function Slot({
             ? "border-amber-500/70 bg-amber-500/10"
             : weapon
             ? "border-[var(--color-edge)] hover:bg-white/5"
-            : "border-dashed border-[var(--color-edge)] text-slate-500 hover:border-sky-500/60 hover:text-sky-300"
+            : "border-dashed border-[var(--color-edge)] text-slate-500 hover:border-cyan-500/60 hover:text-cyan-300"
         }`}
       >
         {weapon ? (
@@ -384,7 +387,7 @@ function Slot({
         className={`flex w-full items-center justify-center gap-1.5 rounded-lg border py-1 transition ${
           sonata.length
             ? "border-[var(--color-edge)] hover:bg-white/5"
-            : "border-dashed border-[var(--color-edge)] text-slate-500 hover:border-sky-500/60 hover:text-sky-300"
+            : "border-dashed border-[var(--color-edge)] text-slate-500 hover:border-cyan-500/60 hover:text-cyan-300"
         }`}
       >
         {sonata.length ? (

@@ -8,9 +8,19 @@ type Release = {
 // Concise, visitor-friendly highlights. Full detail lives in CHANGELOG.md.
 const RELEASES: Release[] = [
   {
-    version: "1.2.0",
+    version: "1.3.0",
     date: "2026-06-21",
     tag: "new",
+    changes: [
+      "Holographic visual refresh — a Wuthering Waves-style endgame look with notched panels, glowing cyan/gold edges, a subtle grid background, and tech-style headers.",
+      "Endstate Matrix → Sonata sets: note the echo sets each Resonator runs, right on the team card.",
+      "Material Calculator → Planner toggles: tap a Resonator's head to include or exclude its materials from the totals.",
+      "Export / Import now cover both tools (teams, inventory, and the whole calculator) in one file.",
+    ],
+  },
+  {
+    version: "1.2.0",
+    date: "2026-06-21",
     changes: [
       "Material Calculator — a pre-farming planner that aggregates every upgrade material into one shopping list.",
       "Set current→target Level, Ascension, the five active skills, and the forte nodes per Resonator (and weapon).",
@@ -48,8 +58,8 @@ export function ChangelogPanel() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-5">
       <div className="mx-auto mb-4 max-w-3xl">
-        <h2 className="text-lg font-semibold">Changelog</h2>
-        <p className="text-xs text-slate-400">Recent changes to the planner.</p>
+        <h2 className="tech-head tech-tick text-sm font-bold">Changelog</h2>
+        <p className="mt-1 pl-[0.85rem] text-xs text-slate-400">Recent changes to the planner.</p>
       </div>
 
       <div className="mx-auto max-w-3xl space-y-5">
@@ -59,7 +69,7 @@ export function ChangelogPanel() {
               <span
                 className={`rounded-md px-2 py-0.5 text-xs font-semibold ${
                   r.tag === "new"
-                    ? "bg-sky-500/15 text-sky-300"
+                    ? "bg-cyan-500/15 text-cyan-300"
                     : "bg-[var(--color-panel2)] text-slate-300"
                 }`}
               >

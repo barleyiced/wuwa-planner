@@ -77,7 +77,7 @@ export function CharacterPicker({
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search Resonators…"
-          className="w-full rounded-lg border border-[var(--color-edge)] bg-[var(--color-panel2)] px-3 py-2 text-sm outline-none placeholder:text-slate-500 focus:border-sky-500"
+          className="w-full rounded-lg border border-[var(--color-edge)] bg-[var(--color-panel2)] px-3 py-2 text-sm outline-none placeholder:text-slate-500 focus:border-cyan-500"
         />
         <div className="flex flex-wrap gap-1.5">
           {Object.entries(ELEMENTS).map(([id, el]) => {
@@ -181,8 +181,8 @@ function CharacterCard({
       aria-disabled={disabled}
       className={`group relative overflow-hidden rounded-xl border transition ${
         selected
-          ? "border-sky-400 ring-2 ring-sky-400/50"
-          : "border-[var(--color-edge)] hover:border-sky-500/60"
+          ? "border-cyan-400 ring-2 ring-cyan-400/50"
+          : "border-[var(--color-edge)] hover:border-cyan-500/60"
       } ${disabled ? "cursor-not-allowed" : "hover:-translate-y-0.5"}`}
     >
       <div className={disabled ? "opacity-35 grayscale" : ""}>
