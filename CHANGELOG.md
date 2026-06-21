@@ -7,12 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-<!-- Add changes for the next release here. Suggested headings:
-### Added
 ### Changed
-### Fixed
-### Removed
--->
+
+- **Material Calculator → Planner** summary bar now shows the Waveplate icon next to the
+  total Waveplate figure, matching the per-category and section headers.
 
 ## [1.3.1] - 2026-06-21
 

@@ -98,7 +98,7 @@ export function MaterialTotals({
       <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-2xl border border-[var(--color-edge)] bg-[var(--color-panel)] px-4 py-3">
         {controls}
         <div className="ml-auto flex items-center gap-6">
-          <Stat label="Waveplate" value={fmt(plan.totalWaveplate)} />
+          <Stat label="Waveplate" value={fmt(plan.totalWaveplate)} icon={<WaveplateIcon className="h-5 w-5" />} />
           <Stat label="Est. days" value={daysLabel(plan.totalDays)} />
         </div>
       </div>
@@ -150,11 +150,22 @@ export function MaterialTotals({
 /** Per-round Waveplate tiers the categories are grouped under, in display order. */
 const WAVEPLATE_SECTIONS = [0, 40, 60] as const;
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({
+  label,
+  value,
+  icon,
+}: {
+  label: string;
+  value: string;
+  icon?: ReactNode;
+}) {
   return (
-    <div className="text-right leading-tight">
-      <div className="text-base font-semibold tabular-nums text-slate-100">{value}</div>
-      <div className="text-[10px] uppercase tracking-wide text-slate-500">{label}</div>
+    <div className="flex items-center gap-1.5 leading-tight">
+      {icon}
+      <div className="text-right">
+        <div className="text-base font-semibold tabular-nums text-slate-100">{value}</div>
+        <div className="text-[10px] uppercase tracking-wide text-slate-500">{label}</div>
+      </div>
     </div>
   );
 }
