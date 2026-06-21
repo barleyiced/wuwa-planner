@@ -91,6 +91,92 @@ export const WEAPON_TYPE_ICONS: Record<number, string> = {
   5: `${ASSETS}/rectifier.webp`,
 };
 
+// ---- Sonata sets (echo set effects) -------------------------------------
+// A resonator equips 5 echoes (ECHO_SLOTS) whose Sonata Effects come from 1–3 sets.
+// Each set activates at fixed piece counts (`pieces`): the classic sets at 2pc/5pc,
+// the newer batch at a single 3pc, and the newest at 1pc — so valid splits are e.g.
+// 5, 3+2, 2+2+1, or 3+1. In the Endstate Matrix these live purely on the team listing
+// as a build note (no Sonata inventory). The list is a small curated map (like ELEMENTS
+// / WEAPON_TYPES); ids match the released datamine's set index — group 15 ("Wrath of the
+// Deep") is an enemy-only fetter with no player echoes, so it's absent (31 sets).
+//
+// Icons are the real in-game per-set "attribute" emblems, served by nanoka like every
+// other asset. Both the icon path (`FetterElementPath`, IconElementAttri/*) and the
+// `pieces` thresholds (`FetterMap` keys) come from the datamine's phantomfettergroup
+// table; we store the icon suffix and build the url via the standard iconUrl() transform.
+// `SonataIcon` still falls back to a monogram if an asset ever fails to load.
+export interface Sonata {
+  id: string;
+  name: string;
+  icon: string; // nanoka emblem url (see attriIcon); "" falls back to a monogram
+  pieces: number[]; // echo counts that activate an effect, ascending (e.g. [2,5], [3], [1])
+}
+
+const ATTRI_BASE = "/Game/Aki/UI/UIResources/Common/Image/IconElementAttri";
+const attriIcon = (suffix: string) => iconUrl(`${ATTRI_BASE}/T_IconElementAttri${suffix}`);
+
+/** Echo slots on a resonator — the piece budget a set selection must fit within. */
+export const ECHO_SLOTS = 5;
+
+// Defined oldest-first for readable, id-ordered maintenance; the exported `SONATA`
+// is newest-first (see below), so a set added at the bottom here floats to the top.
+const SONATA_BY_INDEX: Sonata[] = [
+  { id: "1", name: "Freezing Frost", icon: attriIcon("Ice"), pieces: [2, 5] },
+  { id: "2", name: "Molten Rift", icon: attriIcon("Fire"), pieces: [2, 5] },
+  { id: "3", name: "Void Thunder", icon: attriIcon("Thunder"), pieces: [2, 5] },
+  { id: "4", name: "Sierra Gale", icon: attriIcon("Wind"), pieces: [2, 5] },
+  { id: "5", name: "Celestial Light", icon: attriIcon("Light"), pieces: [2, 5] },
+  { id: "6", name: "Havoc Eclipse", icon: attriIcon("Dark"), pieces: [2, 5] },
+  { id: "7", name: "Rejuvenating Glow", icon: attriIcon("Cure"), pieces: [2, 5] },
+  { id: "8", name: "Moonlit Clouds", icon: attriIcon("Cloud"), pieces: [2, 5] },
+  { id: "9", name: "Lingering Tunes", icon: attriIcon("Attack"), pieces: [2, 5] },
+  { id: "10", name: "Frosty Resolve", icon: attriIcon("IceUltimateSkill"), pieces: [2, 5] },
+  { id: "11", name: "Eternal Radiance", icon: attriIcon("LightError"), pieces: [2, 5] },
+  { id: "12", name: "Midnight Veil", icon: attriIcon("DarkAssist"), pieces: [2, 5] },
+  { id: "13", name: "Empyrean Anthem", icon: attriIcon("Cooperate"), pieces: [2, 5] },
+  { id: "14", name: "Tidebreaking Courage", icon: attriIcon("Energy"), pieces: [2, 5] },
+  { id: "16", name: "Gusts of Welkin", icon: attriIcon("WindError"), pieces: [2, 5] },
+  { id: "17", name: "Windward Pilgrimage", icon: attriIcon("WindErrorA"), pieces: [2, 5] },
+  { id: "18", name: "Flaming Clawprint", icon: attriIcon("FireUltimateSkill"), pieces: [2, 5] },
+  { id: "19", name: "Dream of the Lost", icon: attriIcon("DarkVision"), pieces: [3] },
+  { id: "20", name: "Crown of Valor", icon: attriIcon("Shield"), pieces: [3] },
+  { id: "21", name: "Law of Harmony", icon: attriIcon("Support"), pieces: [3] },
+  { id: "22", name: "Flamewing's Shadow", icon: attriIcon("FireA"), pieces: [3] },
+  { id: "23", name: "Thread of Severed Fate", icon: attriIcon("QianXiao"), pieces: [3] },
+  { id: "24", name: "Pact of Neonlight Leap", icon: attriIcon("LightWeakness"), pieces: [2, 5] },
+  { id: "25", name: "Halo of Starry Radiance", icon: attriIcon("CureWeakness"), pieces: [2, 5] },
+  { id: "26", name: "Rite of Gilded Revelation", icon: attriIcon("AttackWeakness"), pieces: [2, 5] },
+  { id: "27", name: "Trailblazing Star", icon: attriIcon("FireA1"), pieces: [2, 5] },
+  { id: "28", name: "Chromatic Foam", icon: attriIcon("FireA2"), pieces: [2, 5] },
+  { id: "29", name: "Sound of True Name", icon: attriIcon("WindVision"), pieces: [2, 5] },
+  { id: "30", name: "Wishes of Quiet Snowfall", icon: attriIcon("IceA1"), pieces: [2, 5] },
+  { id: "31", name: "Reel of Spliced Memories", icon: attriIcon("Support1"), pieces: [2, 5] },
+  { id: "32", name: "Shadow of Shattered Dreams", icon: attriIcon("Adam"), pieces: [1] },
+];
+
+/** Sonata sets, newest-first (highest datamine index on top), for display + picking. */
+export const SONATA: Sonata[] = [...SONATA_BY_INDEX].reverse();
+
+export const SONATA_BY_ID: Record<string, Sonata> = Object.fromEntries(
+  SONATA.map((s) => [s.id, s])
+);
+
+/**
+ * Fewest echoes a set occupies to activate (its lowest threshold) — the cost it
+ * spends against the 5-echo budget when picked.
+ */
+export function sonataMinPieces(id: string): number {
+  return SONATA_BY_ID[id]?.pieces[0] ?? 2;
+}
+
+/** Echoes already committed by a set selection (sum of each set's minimum pieces). */
+export function sonataPiecesUsed(ids: string[]): number {
+  return ids.reduce((sum, id) => sum + sonataMinPieces(id), 0);
+}
+
+/** Max distinct Sonata sets one resonator can run (5 echoes → at most a 2+2+1 split). */
+export const MAX_SONATA = 3;
+
 export const RARITY: Record<number, { color: string; glow: string }> = {
   1: { color: "#9aa7bd", glow: "rgba(154,167,189,0.0)" },
   2: { color: "#67c98e", glow: "rgba(103,201,142,0.18)" },
@@ -252,6 +338,9 @@ export function loadMaterialData(): MaterialData {
 export function itemIconUrl(iconPath: string): string {
   return iconPath ? `${CDN}/assets/ww/${iconPath}.webp` : "";
 }
+
+/** The in-game Waveplate (action-point) item icon — labels Waveplate costs in the UI. */
+export const WAVEPLATE_ICON = itemIconUrl("UIResources/Common/Image/IconA80/T_IconA80_yml_UI");
 
 /**
  * Break a total EXP requirement into a count of EXP items, largest tier first,

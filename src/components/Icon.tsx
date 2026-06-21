@@ -1,12 +1,14 @@
 import { useState } from "react";
 import {
   RARITY,
+  WAVEPLATE_ICON,
   WEAPON_TYPES,
   WEAPON_TYPE_ICONS,
   elementOf,
   itemIconUrl,
   type Character,
   type MaterialItem,
+  type Sonata,
   type Weapon,
 } from "../game";
 
@@ -53,6 +55,23 @@ export function ElementIcon({
       src={el.icon}
       alt={el.name}
       title={el.name}
+      loading="lazy"
+      draggable={false}
+      onError={() => setFailed(true)}
+      className={`${className} object-contain`}
+    />
+  );
+}
+
+/** The in-game Waveplate icon. Renders nothing if the asset is missing/fails. */
+export function WaveplateIcon({ className = "h-4 w-4" }: { className?: string }) {
+  const [failed, setFailed] = useState(false);
+  if (!WAVEPLATE_ICON || failed) return null;
+  return (
+    <img
+      src={WAVEPLATE_ICON}
+      alt="Waveplate"
+      title="Waveplate"
       loading="lazy"
       draggable={false}
       onError={() => setFailed(true)}
@@ -206,6 +225,47 @@ export function ItemIcon({
         className="h-full w-full object-contain p-0.5"
       />
     </div>
+  );
+}
+
+/** Up-to-two-letter monogram from a set name, e.g. "Freezing Frost" → "FF". */
+function sonataMonogram(name: string): string {
+  const words = name.split(/[\s'-]+/).filter(Boolean);
+  return (words[0]?.[0] ?? "") + (words[1]?.[0] ?? "");
+}
+
+/**
+ * A Sonata set's emblem, sized by `className`. Older sets ship an emblem image;
+ * for the rest (and on load failure) it falls back to a rounded monogram, so the
+ * tile is always present and labelled via its title.
+ */
+export function SonataIcon({
+  sonata,
+  className = "h-5 w-5",
+}: {
+  sonata: Sonata;
+  className?: string;
+}) {
+  const [failed, setFailed] = useState(false);
+  if (sonata.icon && !failed)
+    return (
+      <img
+        src={sonata.icon}
+        alt={sonata.name}
+        title={sonata.name}
+        loading="lazy"
+        draggable={false}
+        onError={() => setFailed(true)}
+        className={`${className} shrink-0 rounded-full object-contain`}
+      />
+    );
+  return (
+    <span
+      title={sonata.name}
+      className={`${className} flex shrink-0 items-center justify-center rounded-full bg-[var(--color-panel2)] text-[8px] font-semibold uppercase leading-none text-slate-300 ring-1 ring-[var(--color-edge)]`}
+    >
+      {sonataMonogram(sonata.name)}
+    </span>
   );
 }
 

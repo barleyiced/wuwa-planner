@@ -53,6 +53,9 @@ export interface CalcState {
   /** Materials the user already owns, by item id. Subtracted from totals to show
    *  what is left to farm. Absent/zero entries mean "none owned". */
   inventory: Record<number, number>;
+  /** Goal ids excluded from the aggregated totals. Present = excluded; absent =
+   *  included (default on). Lets the Planner toggle a Resonator out of the list. */
+  excluded: Record<string, true>;
 }
 
 const STORAGE_KEY = "wuwa.calc.v1";
@@ -114,6 +117,17 @@ function reviveNodes(raw: unknown): Record<number, boolean> {
   return out;
 }
 
+/** Keep only the explicit exclusions (value true); everything else is included. */
+function reviveExcluded(raw: unknown): Record<string, true> {
+  const out: Record<string, true> = {};
+  if (raw && typeof raw === "object") {
+    for (const [id, on] of Object.entries(raw as Record<string, unknown>)) {
+      if (on === true) out[id] = true;
+    }
+  }
+  return out;
+}
+
 /** Keep only positive, integer owned counts so storage and math stay clean. */
 function reviveInventory(raw: unknown): Record<number, number> {
   const out: Record<number, number> = {};
@@ -126,21 +140,29 @@ function reviveInventory(raw: unknown): Record<number, number> {
   return out;
 }
 
+/** Repair an arbitrary persisted/imported blob into a sound CalcState. */
+function reviveState(raw: unknown): CalcState | null {
+  if (!raw || typeof raw !== "object") return null;
+  const parsed = raw as Partial<CalcState>;
+  if (!Array.isArray(parsed.goals)) return null;
+  return {
+    goals: parsed.goals.map(reviveGoal),
+    inventory: reviveInventory(parsed.inventory),
+    excluded: reviveExcluded(parsed.excluded),
+  };
+}
+
 function initialState(): CalcState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY) ?? migrateLegacy(LEGACY_STORAGE_KEY, STORAGE_KEY);
     if (raw) {
-      const parsed = JSON.parse(raw) as Partial<CalcState>;
-      if (parsed && Array.isArray(parsed.goals))
-        return {
-          goals: parsed.goals.map(reviveGoal),
-          inventory: reviveInventory(parsed.inventory),
-        };
+      const revived = reviveState(JSON.parse(raw));
+      if (revived) return revived;
     }
   } catch {
     /* fall through to default */
   }
-  return { goals: [makeGoal()], inventory: {} };
+  return { goals: [makeGoal()], inventory: {}, excluded: {} };
 }
 
 const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, Math.round(n)));
@@ -285,7 +307,21 @@ export function useCalc() {
   }, []);
 
   const removeGoal = useCallback((id: string) => {
-    setState((s) => ({ ...s, goals: s.goals.filter((g) => g.id !== id) }));
+    setState((s) => {
+      const excluded = { ...s.excluded };
+      delete excluded[id];
+      return { ...s, goals: s.goals.filter((g) => g.id !== id), excluded };
+    });
+  }, []);
+
+  /** Toggle whether a goal's materials count toward the aggregated totals. */
+  const toggleGoalIncluded = useCallback((id: string) => {
+    setState((s) => {
+      const excluded = { ...s.excluded };
+      if (excluded[id]) delete excluded[id];
+      else excluded[id] = true;
+      return { ...s, excluded };
+    });
   }, []);
 
   const setCharacter = useCallback(
@@ -369,9 +405,16 @@ export function useCalc() {
   );
 
   const resetAll = useCallback(
-    () => setState((s) => ({ ...s, goals: [makeGoal()] })),
+    () => setState((s) => ({ ...s, goals: [makeGoal()], excluded: {} })),
     []
   );
+
+  /** Replace all calculator state from an imported blob, reviving partial shapes. */
+  const importState = useCallback((raw: unknown) => {
+    const revived = reviveState(raw);
+    if (revived) setState(revived);
+    return revived !== null;
+  }, []);
 
   /** Set how many of a material the user already owns (0 clears the entry). */
   const setOwned = useCallback((itemId: number, qty: number) => {
@@ -393,11 +436,12 @@ export function useCalc() {
   const totals = useMemo<Record<number, number>>(() => {
     const acc: Record<number, number> = {};
     for (const g of state.goals) {
+      if (state.excluded[g.id]) continue; // toggled out of the totals
       const cost = goalCost(g, mat);
       for (const id in cost) acc[id] = (acc[Number(id)] ?? 0) + cost[Number(id)];
     }
     return acc;
-  }, [state.goals, mat]);
+  }, [state.goals, state.excluded, mat]);
 
   return {
     state,
@@ -405,6 +449,7 @@ export function useCalc() {
     totals,
     addGoal,
     removeGoal,
+    toggleGoalIncluded,
     setCharacter,
     setWeapon,
     toggleNode,
@@ -412,6 +457,7 @@ export function useCalc() {
     setLevelStop,
     setSkillRange,
     resetAll,
+    importState,
     setOwned,
     clearInventory,
   };

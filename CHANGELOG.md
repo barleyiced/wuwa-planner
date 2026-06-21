@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Endstate Matrix → Sonata sets.** Each resonator slot on a team card now carries a
+  Sonata note below its weapon: pick the echo sets that resonator runs. It's a build note
+  only — there's no Sonata inventory to track. The slot stays compact, showing just the
+  set emblems until tapped, which opens a multi-select picker (all 31 sets, newest first).
+  Each set shows its activation count — 2pc/5pc, 3pc, or 1pc — and selection is bounded by
+  the real 5-echo budget (so e.g. 5, 3+2, or 2+2+1), dimming sets that no longer fit. Saved
+  plans are migrated in place (the new field defaults to empty), so `wuwa.plan.v1` is
+  unchanged.
+- **Material Calculator → Planner** — a head-icon toggle bar above the "still to farm"
+  plan, one per built Resonator. Each is on by default; tapping a head excludes that
+  Resonator's materials from the aggregated totals (and tapping again folds them back
+  in). The selection persists under `wuwa.calc.v1`.
+
+### Changed
+
+- **Export / Import now cover both tools.** The sidebar "Data" menu's Export and Import
+  (renamed from "Export/Import plan") write and restore a single file containing both the
+  Endstate Matrix (teams + weapon inventory) and the Material Calculator (goals, owned
+  materials, and Planner selections). Existing plan-only export files still import
+  correctly. "Reset everything" likewise now clears both tools.
+- **Material Calculator → Planner** now groups its category cards into 0 / 40 / 60
+  Waveplate sections (by per-round farming cost), and each category card shows its own
+  Waveplate total — with the in-game Waveplate icon — on the right of its header.
+  Material tiles show only the icon and remaining count until tapped, where they expand
+  to reveal the name and the owned-count stepper.
+- **Material Calculator** no longer allows the same Resonator on more than one goal:
+  Resonators already added are shown as "Added" and locked out in the Resonator picker
+  (both when adding a new goal and when changing an existing one).
+
 <!-- Add more changes for the next release here. Suggested headings:
 ### Added
 ### Changed

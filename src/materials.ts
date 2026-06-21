@@ -190,7 +190,7 @@ export const DAILY_WAVEPLATE = 240;
  * the whole chunk even to obtain a single missing drop — so per-category costs are
  * rounded up to whole rounds (see planFarming). Enemy/Specialty drops cost no Waveplate.
  */
-const ROUND_WAVEPLATE: Record<Cat, number> = {
+export const ROUND_WAVEPLATE: Record<Cat, number> = {
   roleExp: 40,
   weaponExp: 40,
   credits: 40,

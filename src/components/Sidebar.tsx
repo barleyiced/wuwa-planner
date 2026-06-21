@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import type { PlanApi, PlanState } from "../store";
+import type { CalcApi } from "../calc";
 
 export type Route = "home" | "matrix" | "calc" | "changelog";
 
@@ -22,6 +23,7 @@ export function Sidebar({
   collapsed,
   setCollapsed,
   plan,
+  calc,
   version,
 }: {
   route: Route;
@@ -29,6 +31,7 @@ export function Sidebar({
   collapsed: boolean;
   setCollapsed: (v: boolean) => void;
   plan: PlanApi;
+  calc: CalcApi;
   version?: string;
 }) {
   return (
@@ -68,7 +71,7 @@ export function Sidebar({
       </nav>
 
       <div className="border-t border-[var(--color-edge)] p-2">
-        <DataMenu plan={plan} collapsed={collapsed} />
+        <DataMenu plan={plan} calc={calc} collapsed={collapsed} />
         <button
           onClick={() => setCollapsed(!collapsed)}
           className={`mt-1 flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-sm text-slate-400 hover:bg-white/5 ${
@@ -94,18 +97,41 @@ function exportStamp(d = new Date()): string {
   );
 }
 
-function DataMenu({ plan, collapsed }: { plan: PlanApi; collapsed: boolean }) {
+// Combined export envelope: both tools' state in one file. Bump `version` if the
+// envelope shape changes; `kind` lets import tell our files apart from stray JSON.
+interface ExportBundle {
+  kind: "wuwa-planner-export";
+  version: 1;
+  plan: PlanState;
+  calc: CalcApi["state"];
+}
+
+function DataMenu({
+  plan,
+  calc,
+  collapsed,
+}: {
+  plan: PlanApi;
+  calc: CalcApi;
+  collapsed: boolean;
+}) {
   const [open, setOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const doExport = () => {
-    const blob = new Blob([JSON.stringify(plan.state, null, 2)], { type: "application/json" });
+    const bundle: ExportBundle = {
+      kind: "wuwa-planner-export",
+      version: 1,
+      plan: plan.state,
+      calc: calc.state,
+    };
+    const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
     // Append a local timestamp so repeated exports get distinct filenames
     // instead of the OS auto-suffixing duplicates (e.g. "(1)", "(2)").
-    a.download = `wuwa-plan-${exportStamp()}.json`;
+    a.download = `wuwa-planner-${exportStamp()}.json`;
     a.click();
     URL.revokeObjectURL(url);
     setOpen(false);
@@ -115,11 +141,19 @@ function DataMenu({ plan, collapsed }: { plan: PlanApi; collapsed: boolean }) {
     const reader = new FileReader();
     reader.onload = () => {
       try {
-        const parsed = JSON.parse(String(reader.result)) as PlanState;
-        if (!parsed.inventory || !Array.isArray(parsed.teams)) throw new Error("not a plan file");
-        plan.importState(parsed);
+        const parsed = JSON.parse(String(reader.result)) as Partial<ExportBundle> & Partial<PlanState>;
+        // New files wrap both tools in { plan, calc }. Legacy files are a bare
+        // PlanState (inventory + teams at the top level) — still import those.
+        const planState = parsed.plan ?? (parsed.inventory && parsed.teams ? (parsed as PlanState) : null);
+        let imported = false;
+        if (planState && planState.inventory && Array.isArray(planState.teams)) {
+          plan.importState(planState);
+          imported = true;
+        }
+        if (parsed.calc && calc.importState(parsed.calc)) imported = true;
+        if (!imported) throw new Error("nothing importable");
       } catch {
-        alert("That file doesn't look like a valid plan export.");
+        alert("That file doesn't look like a valid planner export.");
       }
     };
     reader.readAsText(file);
@@ -130,7 +164,7 @@ function DataMenu({ plan, collapsed }: { plan: PlanApi; collapsed: boolean }) {
     <div className="relative">
       <button
         onClick={() => setOpen((v) => !v)}
-        title={collapsed ? "Plan data" : undefined}
+        title={collapsed ? "Data" : undefined}
         className={`flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-sm text-slate-300 hover:bg-white/5 ${
           collapsed ? "justify-center" : ""
         }`}
@@ -138,20 +172,27 @@ function DataMenu({ plan, collapsed }: { plan: PlanApi; collapsed: boolean }) {
         <span className="shrink-0">
           <IconData />
         </span>
-        {!collapsed && <span>Plan data ▾</span>}
+        {!collapsed && <span>Data ▾</span>}
       </button>
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
           <div className="absolute bottom-full left-0 z-50 mb-1 w-44 overflow-hidden rounded-lg border border-[var(--color-edge)] bg-[var(--color-panel)] py-1 text-sm shadow-xl">
-            <MenuItem onClick={doExport}>Export plan…</MenuItem>
-            <MenuItem onClick={() => fileRef.current?.click()}>Import plan…</MenuItem>
+            <MenuItem onClick={doExport}>Export data…</MenuItem>
+            <MenuItem onClick={() => fileRef.current?.click()}>Import data…</MenuItem>
             <div className="my-1 h-px bg-[var(--color-edge)]" />
             <MenuItem
               danger
               onClick={() => {
-                if (confirm("Clear all teams and inventory? This can't be undone."))
+                if (
+                  confirm(
+                    "Clear everything — teams, weapon inventory, and the Material Calculator? This can't be undone."
+                  )
+                ) {
                   plan.resetAll();
+                  calc.resetAll();
+                  calc.clearInventory();
+                }
                 setOpen(false);
               }}
             >

@@ -1,13 +1,14 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import type { MaterialData } from "../game";
 import {
   CAT_LABELS,
   DAILY_WAVEPLATE,
+  ROUND_WAVEPLATE,
   planFarming,
   type FarmCategory,
   type FarmRow,
 } from "../materials";
-import { ItemIcon } from "./Icon";
+import { ItemIcon, WaveplateIcon } from "./Icon";
 import { CountStepper, TILE_MARK, useCloseOnOutside } from "./MaterialInventory";
 
 /** "3.2 days" / "<1 day" / "—" from a fractional day count. */
@@ -24,20 +25,26 @@ const fmt = (n: number) => Math.round(n).toLocaleString();
  * categories. Each category nets the gross requirement against owned counts (folding
  * in lower→higher rarity synthesis) and estimates the Waveplate + days left to farm.
  *
- * Mats render as tiles (icon + name + remaining); tapping one reveals an owned-count
- * stepper that writes straight to the shared inventory, so edits here and on the
- * Inventory tab stay in sync both ways.
+ * Categories are grouped into sections by their per-round Waveplate cost (0 / 40 / 60),
+ * and each category card shows its own Waveplate total on the right of its header.
+ *
+ * Mats render as tiles (icon + remaining); tapping one expands it to reveal the name
+ * plus an owned-count stepper that writes straight to the shared inventory, so edits
+ * here and on the Inventory tab stay in sync both ways.
  */
 export function MaterialTotals({
   totals,
   inventory,
   mat,
   setOwned,
+  controls,
 }: {
   totals: Record<number, number>;
   inventory: Record<number, number>;
   mat: MaterialData;
   setOwned: (itemId: number, qty: number) => void;
+  /** Optional left-hand content for the summary bar (e.g. include-in-totals toggles). */
+  controls?: ReactNode;
 }) {
   const plan = useMemo(
     () => planFarming(totals, inventory, mat),
@@ -53,20 +60,11 @@ export function MaterialTotals({
     );
   }
 
-  const allDone = plan.remainingItems === 0;
-
   return (
     <div className="space-y-4">
-      {/* summary bar */}
+      {/* summary bar: toggles on the left, Waveplate / days on the right */}
       <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-2xl border border-[var(--color-edge)] bg-[var(--color-panel)] px-4 py-3">
-        <div>
-          <div className="text-lg font-semibold leading-none">Still to farm</div>
-          <div className="mt-1 text-xs text-slate-500">
-            {allDone
-              ? "Everything's covered by your inventory."
-              : `${plan.remainingItems} of ${plan.totalItems} materials left`}
-          </div>
-        </div>
+        {controls}
         <div className="ml-auto flex items-center gap-6">
           <Stat label="Waveplate" value={fmt(plan.totalWaveplate)} />
           <Stat label="Est. days" value={daysLabel(plan.totalDays)} />
@@ -82,22 +80,42 @@ export function MaterialTotals({
         so neither counts toward the days estimate. Tap a material to set how many you own.
       </p>
 
-      {/* categories laid out in four columns */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {plan.categories.map((c) => (
-          <CategoryCard
-            key={c.cat}
-            category={c}
-            inventory={inventory}
-            setOwned={setOwned}
-            openId={openId}
-            setOpenId={setOpenId}
-          />
-        ))}
-      </div>
+      {/* categories grouped by their per-round Waveplate cost (0 / 40 / 60) */}
+      {WAVEPLATE_SECTIONS.map((wp) => {
+        const cats = plan.categories.filter((c) => ROUND_WAVEPLATE[c.cat] === wp);
+        if (cats.length === 0) return null;
+        return (
+          <section key={wp} className="space-y-2.5">
+            <div className="flex items-center gap-2 px-0.5">
+              <WaveplateIcon className="h-5 w-5" />
+              <h2 className="text-sm font-semibold text-slate-200">
+                {wp} Waveplate{" "}
+                <span className="text-xs font-normal text-slate-500">
+                  {wp === 0 ? "· open-world gather" : "per farming round"}
+                </span>
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {cats.map((c) => (
+                <CategoryCard
+                  key={c.cat}
+                  category={c}
+                  inventory={inventory}
+                  setOwned={setOwned}
+                  openId={openId}
+                  setOpenId={setOpenId}
+                />
+              ))}
+            </div>
+          </section>
+        );
+      })}
     </div>
   );
 }
+
+/** Per-round Waveplate tiers the categories are grouped under, in display order. */
+const WAVEPLATE_SECTIONS = [0, 40, 60] as const;
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
@@ -123,8 +141,19 @@ function CategoryCard({
 }) {
   return (
     <div className="rounded-2xl border border-[var(--color-edge)] bg-[var(--color-panel)]">
-      <div className="flex items-baseline gap-2 border-b border-[var(--color-edge)] px-3 py-2.5">
+      <div className="flex items-center gap-2 border-b border-[var(--color-edge)] px-3 py-2.5">
         <h3 className="text-sm font-semibold">{CAT_LABELS[category.cat]}</h3>
+        {category.waveplate > 0 && (
+          <span
+            className="ml-auto flex shrink-0 items-center gap-1 text-xs font-semibold tabular-nums text-slate-300"
+            title={`${fmt(category.waveplate)} Waveplate${
+              category.gated ? " (entry-gated — not counted in the days estimate)" : ""
+            }`}
+          >
+            {fmt(category.waveplate)}
+            <WaveplateIcon className="h-4 w-4" />
+          </span>
+        )}
       </div>
       <div className="grid grid-cols-[repeat(auto-fill,minmax(72px,1fr))] gap-2 p-2.5">
         {category.rows.map((r) => (
@@ -176,11 +205,13 @@ function MatTile({
       >
         <ItemIcon item={row.item} size="sm" />
       </button>
-      <span className="line-clamp-2 h-8 text-center text-[11px] leading-tight text-slate-300">
-        {row.item.name}
-      </span>
       {open ? (
-        <CountStepper value={owned} onChange={(v) => setOwned(row.id, v)} />
+        <>
+          <span className="line-clamp-2 text-center text-[11px] leading-tight text-slate-300">
+            {row.item.name}
+          </span>
+          <CountStepper value={owned} onChange={(v) => setOwned(row.id, v)} />
+        </>
       ) : done ? (
         <span className="text-xs font-medium text-emerald-400">✓ done</span>
       ) : (

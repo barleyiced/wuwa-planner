@@ -72,6 +72,7 @@ export function App() {
         collapsed={ui.collapsed}
         setCollapsed={setCollapsed}
         plan={plan}
+        calc={calc}
         version={data?.version}
       />
 

@@ -5,6 +5,7 @@ import {
   SKILL_LABELS,
   SKILL_ORDER,
   WEAPON_TYPES,
+  type Character,
   type ForteNode,
   type GameData,
   type MaterialCharacter,
@@ -87,7 +88,7 @@ export function CalcPanel({ data, calc }: { data: GameData; calc: CalcApi }) {
           clearInventory={calc.clearInventory}
         />
       )}
-      {tab === "planner" && <PlannerTab calc={calc} />}
+      {tab === "planner" && <PlannerTab data={data} calc={calc} />}
     </div>
   );
 }
@@ -120,6 +121,16 @@ function CharactersTab({ data, calc }: { data: GameData; calc: CalcApi }) {
   const [adding, setAdding] = useState(false);
   const atCap = calc.state.goals.length >= MAX_GOALS;
   const openGoal = openId ? calc.state.goals.find((g) => g.id === openId) ?? null : null;
+  // Resonators already on some goal — locked out of the picker to avoid duplicates.
+  const usedIds = useMemo(
+    () =>
+      new Set(
+        calc.state.goals
+          .map((g) => g.characterId)
+          .filter((id): id is string => Boolean(id))
+      ),
+    [calc.state.goals]
+  );
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-4">
@@ -180,6 +191,7 @@ function CharactersTab({ data, calc }: { data: GameData; calc: CalcApi }) {
         <CalcCharacterPicker
           data={data}
           current={null}
+          taken={usedIds}
           onPick={(id) => {
             const newId = calc.addGoal(id);
             setOpenId(newId);
@@ -191,16 +203,74 @@ function CharactersTab({ data, calc }: { data: GameData; calc: CalcApi }) {
   );
 }
 
-function PlannerTab({ calc }: { calc: CalcApi }) {
+function PlannerTab({ data, calc }: { data: GameData; calc: CalcApi }) {
+  // The Resonators that actually contribute materials — a goal with a resolvable
+  // character. Each gets a head-icon toggle that folds its cost in or out of totals.
+  const built = useMemo(
+    () =>
+      calc.state.goals
+        .map((goal) => ({ goal, char: goal.characterId ? data.characterById[goal.characterId] : null }))
+        .filter((x): x is { goal: CalcGoal; char: Character } => Boolean(x.char)),
+    [calc.state.goals, data.characterById]
+  );
+
   return (
-    <div className="mx-auto max-w-7xl px-4 py-4">
+    <div className="mx-auto max-w-7xl px-4 py-4 space-y-4">
       <MaterialTotals
         totals={calc.totals}
         inventory={calc.state.inventory}
         mat={calc.mat}
         setOwned={calc.setOwned}
+        controls={
+          built.length > 0 ? (
+            <div
+              className="flex flex-wrap gap-1.5"
+              title="Tap a Resonator to add or remove its materials from the totals."
+            >
+              {built.map(({ goal, char }) => (
+                <GoalToggle
+                  key={goal.id}
+                  char={char}
+                  included={!calc.state.excluded[goal.id]}
+                  onToggle={() => calc.toggleGoalIncluded(goal.id)}
+                />
+              ))}
+            </div>
+          ) : undefined
+        }
       />
     </div>
+  );
+}
+
+/** A tiny head-icon toggle: on = counted in totals, off = dimmed and excluded. */
+function GoalToggle({
+  char,
+  included,
+  onToggle,
+}: {
+  char: Character;
+  included: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      onClick={onToggle}
+      aria-pressed={included}
+      title={`${char.name} — ${included ? "counted (tap to exclude)" : "excluded (tap to include)"}`}
+      className={`relative h-9 w-9 shrink-0 overflow-hidden rounded-full border transition ${
+        included
+          ? "border-sky-500/60 ring-1 ring-sky-400/40"
+          : "border-[var(--color-edge)] opacity-40 grayscale hover:opacity-70"
+      }`}
+    >
+      <AssetImg src={char.icon} alt={char.name} className="h-full w-full object-cover" />
+      {!included && (
+        <span className="absolute inset-0 flex items-center justify-center bg-black/40 text-xs font-bold text-slate-200">
+          ✕
+        </span>
+      )}
+    </button>
   );
 }
 
@@ -227,6 +297,17 @@ function GoalModal({
   const weapon = goal.weaponId ? data.weaponById[goal.weaponId] : null;
   const hasData = character ? Boolean(calc.mat.characters[character.id]) : false;
   const cost = useMemo(() => goalCost(goal, calc.mat), [goal, calc.mat]);
+  // Resonators on the other goals — locked out so this goal can't duplicate them.
+  const takenIds = useMemo(
+    () =>
+      new Set(
+        calc.state.goals
+          .filter((g) => g.id !== goal.id)
+          .map((g) => g.characterId)
+          .filter((id): id is string => Boolean(id))
+      ),
+    [calc.state.goals, goal.id]
+  );
 
   const remove = () => {
     calc.removeGoal(goal.id);
@@ -359,6 +440,7 @@ function GoalModal({
         <CalcCharacterPicker
           data={data}
           current={goal.characterId}
+          taken={takenIds}
           onPick={(id) => calc.setCharacter(goal.id, id)}
           onClose={() => setPicker(null)}
         />
@@ -703,11 +785,14 @@ function StopSelect({
 function CalcCharacterPicker({
   data,
   current,
+  taken,
   onPick,
   onClose,
 }: {
   data: GameData;
   current: string | null;
+  /** Resonator ids already used by other goals — locked out to prevent duplicates. */
+  taken: ReadonlySet<string>;
   onPick: (id: string) => void;
   onClose: () => void;
 }) {
@@ -778,22 +863,34 @@ function CalcCharacterPicker({
       </div>
 
       <div className="grid grid-cols-[repeat(auto-fill,minmax(118px,1fr))] gap-2.5 p-4">
-        {results.map((c) => (
-          <button
-            key={c.id}
-            onClick={() => {
-              onPick(c.id);
-              onClose();
-            }}
-            className={`overflow-hidden rounded-xl border transition hover:-translate-y-0.5 ${
-              c.id === current
-                ? "border-sky-400 ring-2 ring-sky-400/50"
-                : "border-[var(--color-edge)] hover:border-sky-500/60"
-            }`}
-          >
-            <CharPortrait char={c} />
-          </button>
-        ))}
+        {results.map((c) => {
+          const isTaken = taken.has(c.id);
+          return (
+            <button
+              key={c.id}
+              disabled={isTaken}
+              onClick={() => {
+                onPick(c.id);
+                onClose();
+              }}
+              title={isTaken ? `${c.name} — already added` : c.name}
+              className={`relative overflow-hidden rounded-xl border transition ${
+                isTaken
+                  ? "cursor-not-allowed border-[var(--color-edge)] opacity-40"
+                  : c.id === current
+                    ? "border-sky-400 ring-2 ring-sky-400/50 hover:-translate-y-0.5"
+                    : "border-[var(--color-edge)] hover:-translate-y-0.5 hover:border-sky-500/60"
+              }`}
+            >
+              <CharPortrait char={c} />
+              {isTaken && (
+                <span className="absolute inset-0 flex items-center justify-center bg-black/55 text-xs font-semibold text-slate-200">
+                  Added
+                </span>
+              )}
+            </button>
+          );
+        })}
         {results.length === 0 && (
           <div className="col-span-full py-10 text-center text-sm text-slate-500">
             No Resonators match those filters.

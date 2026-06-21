@@ -1,11 +1,19 @@
 import { useMemo, useState } from "react";
 import { MAX_TEAMS, type PlanApi, type Team } from "../store";
-import { WEAPON_TYPES, elementOf, vigorGroupKey, vigorOf, type GameData } from "../game";
-import { CharIcon, WeaponIcon, WeaponTypeIcon } from "./Icon";
+import {
+  SONATA_BY_ID,
+  WEAPON_TYPES,
+  elementOf,
+  vigorGroupKey,
+  vigorOf,
+  type GameData,
+} from "../game";
+import { CharIcon, SonataIcon, WeaponIcon, WeaponTypeIcon } from "./Icon";
 import { CharacterPicker } from "./CharacterPicker";
 import { WeaponPicker } from "./WeaponPicker";
+import { SonataPicker } from "./SonataPicker";
 
-type Editing = { teamId: string; slot: number; mode: "char" | "weapon" } | null;
+type Editing = { teamId: string; slot: number; mode: "char" | "weapon" | "sonata" } | null;
 
 export function TeamsPanel({ data, plan }: { data: GameData; plan: PlanApi }) {
   const [editing, setEditing] = useState<Editing>(null);
@@ -123,6 +131,16 @@ export function TeamsPanel({ data, plan }: { data: GameData; plan: PlanApi }) {
           onClose={() => setEditing(null)}
         />
       )}
+      {editing && editing.mode === "sonata" && (
+        <SonataPicker
+          plan={plan}
+          teamId={editing.teamId}
+          slotIndex={editing.slot}
+          character={editChar}
+          selected={editSlot?.sonataIds ?? []}
+          onClose={() => setEditing(null)}
+        />
+      )}
     </div>
   );
 }
@@ -154,7 +172,7 @@ function TeamCard({
   onDragEnterCard: () => void;
   onDropCard: () => void;
   onDragEndCard: () => void;
-  onEdit: (slot: number, mode: "char" | "weapon") => void;
+  onEdit: (slot: number, mode: "char" | "weapon" | "sonata") => void;
 }) {
   // Only arm the native drag when the user grabs the handle, so the name input
   // stays selectable/editable and the card body doesn't initiate a drag.
@@ -239,9 +257,11 @@ function TeamCard({
             plan={plan}
             characterId={slot.characterId}
             weaponId={slot.weaponId}
+            sonataIds={slot.sonataIds}
             overVigor={slot.characterId ? overVigorIds.has(slot.characterId) : false}
             onEditChar={() => onEdit(i, "char")}
             onEditWeapon={() => onEdit(i, "weapon")}
+            onEditSonata={() => onEdit(i, "sonata")}
             onClear={() => plan.clearSlot(team.id, i)}
           />
         ))}
@@ -255,18 +275,22 @@ function Slot({
   plan,
   characterId,
   weaponId,
+  sonataIds,
   overVigor,
   onEditChar,
   onEditWeapon,
+  onEditSonata,
   onClear,
 }: {
   data: GameData;
   plan: PlanApi;
   characterId: string | null;
   weaponId: string | null;
+  sonataIds: string[];
   overVigor: boolean;
   onEditChar: () => void;
   onEditWeapon: () => void;
+  onEditSonata: () => void;
   onClear: () => void;
 }) {
   const char = characterId ? data.characterById[characterId] : null;
@@ -343,6 +367,29 @@ function Slot({
             + <WeaponTypeIcon type={char.weaponType} className="h-3.5 w-3.5" />
             {WEAPON_TYPES[char.weaponType]}
           </span>
+        )}
+      </button>
+
+      <button
+        onClick={onEditSonata}
+        title={
+          sonataIds.length
+            ? sonataIds.map((id) => SONATA_BY_ID[id]?.name).filter(Boolean).join(" · ")
+            : "Assign Sonata sets"
+        }
+        className={`flex w-full items-center justify-center gap-1 rounded-lg border py-1 transition ${
+          sonataIds.length
+            ? "border-[var(--color-edge)] hover:bg-white/5"
+            : "border-dashed border-[var(--color-edge)] text-slate-500 hover:border-sky-500/60 hover:text-sky-300"
+        }`}
+      >
+        {sonataIds.length ? (
+          sonataIds.map(
+            (id) =>
+              SONATA_BY_ID[id] && <SonataIcon key={id} sonata={SONATA_BY_ID[id]} className="h-4 w-4" />
+          )
+        ) : (
+          <span className="text-[9px]">+ Sonata</span>
         )}
       </button>
       <span className="sr-only">{el.name}</span>
