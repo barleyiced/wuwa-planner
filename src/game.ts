@@ -162,16 +162,23 @@ export const SONATA_BY_ID: Record<string, Sonata> = Object.fromEntries(
 );
 
 /**
- * Fewest echoes a set occupies to activate (its lowest threshold) — the cost it
- * spends against the 5-echo budget when picked.
+ * A Sonata set chosen on a slot, at a specific piece tier. A 2/5pc set can be run
+ * as either a 2-piece or a 5-piece (different effects + echo cost), so the tier the
+ * user picked is stored alongside the id — single-tier sets (3pc, 1pc) only have one.
  */
+export interface SonataPick {
+  id: string;
+  pieces: number; // the activated threshold (one of the set's `pieces`)
+}
+
+/** Fewest echoes a set occupies to activate (its lowest threshold). */
 export function sonataMinPieces(id: string): number {
   return SONATA_BY_ID[id]?.pieces[0] ?? 2;
 }
 
-/** Echoes already committed by a set selection (sum of each set's minimum pieces). */
-export function sonataPiecesUsed(ids: string[]): number {
-  return ids.reduce((sum, id) => sum + sonataMinPieces(id), 0);
+/** Echoes committed by a slot's picks (sum of each pick's chosen tier). */
+export function sonataPiecesUsed(picks: SonataPick[]): number {
+  return picks.reduce((sum, p) => sum + p.pieces, 0);
 }
 
 /** Max distinct Sonata sets one resonator can run (5 echoes → at most a 2+2+1 split). */

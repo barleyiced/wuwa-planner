@@ -1,6 +1,12 @@
 // Persistent planner state: weapon inventory + teams, saved to localStorage.
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ECHO_SLOTS, MAX_SONATA, sonataMinPieces, sonataPiecesUsed } from "./game";
+import {
+  ECHO_SLOTS,
+  MAX_SONATA,
+  sonataMinPieces,
+  sonataPiecesUsed,
+  type SonataPick,
+} from "./game";
 import { migrateLegacy } from "./storage";
 
 export const TEAM_SIZE = 3;
@@ -9,8 +15,8 @@ export const MAX_TEAMS = 20;
 export interface Slot {
   characterId: string | null;
   weaponId: string | null;
-  /** Sonata set ids (1–3) this resonator runs — a build note, no inventory. */
-  sonataIds: string[];
+  /** Sonata sets (with their piece tier) this resonator runs — a build note, no inventory. */
+  sonata: SonataPick[];
 }
 
 export interface Team {
@@ -33,7 +39,28 @@ const uid = () =>
   Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
 function emptySlot(): Slot {
-  return { characterId: null, weaponId: null, sonataIds: [] };
+  return { characterId: null, weaponId: null, sonata: [] };
+}
+
+/** Coerce a stored slot's Sonata into the current `SonataPick[]` shape. Handles the
+ *  earlier `sonataIds: string[]` form (mapped to each set's minimum tier) and the
+ *  current `sonata: {id,pieces}[]`, dropping malformed entries. */
+function normalizeSonata(sl: unknown): SonataPick[] {
+  const raw = sl as { sonata?: unknown; sonataIds?: unknown };
+  let picks: SonataPick[] = [];
+  if (Array.isArray(raw.sonata)) {
+    picks = raw.sonata
+      .filter(
+        (p): p is SonataPick =>
+          !!p && typeof p.id === "string" && Number.isFinite(p.pieces)
+      )
+      .map((p) => ({ id: p.id, pieces: p.pieces }));
+  } else if (Array.isArray(raw.sonataIds)) {
+    picks = raw.sonataIds
+      .filter((id): id is string => typeof id === "string")
+      .map((id) => ({ id, pieces: sonataMinPieces(id) }));
+  }
+  return picks.slice(0, MAX_SONATA);
 }
 
 function emptySlots(): Slot[] {
@@ -50,15 +77,16 @@ function initialState(): PlanState {
     if (raw) {
       const parsed = JSON.parse(raw) as PlanState;
       if (parsed && parsed.inventory && Array.isArray(parsed.teams)) {
-        // make sure every team has exactly TEAM_SIZE slots, and that each slot
-        // carries a sonataIds array (added after the original plan.v1 shape — the
-        // new field is a backward-compatible superset, so old plans just get []).
+        // make sure every team has exactly TEAM_SIZE slots, and that each slot's
+        // Sonata is in the current shape (added after the original plan.v1 shape and
+        // since migrated from `sonataIds` to `sonata` — both are normalized here, so
+        // old plans load without a key bump).
         parsed.teams.forEach((t) => {
           while (t.slots.length < TEAM_SIZE) t.slots.push(emptySlot());
           t.slots = t.slots.slice(0, TEAM_SIZE).map((sl) => ({
             characterId: sl.characterId ?? null,
             weaponId: sl.weaponId ?? null,
-            sonataIds: Array.isArray(sl.sonataIds) ? sl.sonataIds.slice(0, MAX_SONATA) : [],
+            sonata: normalizeSonata(sl),
           }));
         });
         return parsed;
@@ -176,7 +204,7 @@ export function usePlan() {
     (teamId: string, slotIndex: number, characterId: string | null) => {
       // changing the character clears an incompatible weapon at the call site;
       // here we set character and reset weapon + sonata (a per-build note) to be safe.
-      updateSlot(teamId, slotIndex, { characterId, weaponId: null, sonataIds: [] });
+      updateSlot(teamId, slotIndex, { characterId, weaponId: null, sonata: [] });
     },
     [updateSlot]
   );
@@ -188,37 +216,36 @@ export function usePlan() {
     [updateSlot]
   );
 
-  // Toggle a Sonata set on a slot. Adding is a no-op when it wouldn't fit the
-  // 5-echo budget (its min pieces exceed the remaining echoes) or the distinct-set
-  // cap — the picker dims those, this guards imports/races.
-  const toggleSlotSonata = useCallback((teamId: string, slotIndex: number, sonataId: string) => {
-    setState((s) => ({
-      ...s,
-      teams: s.teams.map((t) => {
-        if (t.id !== teamId) return t;
-        const slots = t.slots.map((sl, i) => {
-          if (i !== slotIndex) return sl;
-          const has = sl.sonataIds.includes(sonataId);
-          if (!has) {
-            const fitsBudget =
-              sonataPiecesUsed(sl.sonataIds) + sonataMinPieces(sonataId) <= ECHO_SLOTS;
-            if (!fitsBudget || sl.sonataIds.length >= MAX_SONATA) return sl;
-          }
-          return {
-            ...sl,
-            sonataIds: has
-              ? sl.sonataIds.filter((id) => id !== sonataId)
-              : [...sl.sonataIds, sonataId],
-          };
-        });
-        return { ...t, slots };
-      }),
-    }));
-  }, []);
+  // Set a Sonata set on a slot at a piece tier. Tapping the tier a set is already
+  // at removes it; tapping a different tier switches it. Adding/switching is a no-op
+  // when it wouldn't fit the 5-echo budget or the distinct-set cap — the picker dims
+  // those, this guards imports/races.
+  const setSlotSonata = useCallback(
+    (teamId: string, slotIndex: number, sonataId: string, pieces: number) => {
+      setState((s) => ({
+        ...s,
+        teams: s.teams.map((t) => {
+          if (t.id !== teamId) return t;
+          const slots = t.slots.map((sl, i) => {
+            if (i !== slotIndex) return sl;
+            const existing = sl.sonata.find((p) => p.id === sonataId);
+            if (existing && existing.pieces === pieces)
+              return { ...sl, sonata: sl.sonata.filter((p) => p.id !== sonataId) };
+            const others = sl.sonata.filter((p) => p.id !== sonataId);
+            if (!existing && sl.sonata.length >= MAX_SONATA) return sl;
+            if (sonataPiecesUsed(others) + pieces > ECHO_SLOTS) return sl;
+            return { ...sl, sonata: [...others, { id: sonataId, pieces }] };
+          });
+          return { ...t, slots };
+        }),
+      }));
+    },
+    []
+  );
 
   const clearSlot = useCallback(
     (teamId: string, slotIndex: number) => {
-      updateSlot(teamId, slotIndex, { characterId: null, weaponId: null, sonataIds: [] });
+      updateSlot(teamId, slotIndex, { characterId: null, weaponId: null, sonata: [] });
     },
     [updateSlot]
   );
@@ -269,7 +296,7 @@ export function usePlan() {
     reorderTeam,
     setSlotCharacter,
     setSlotWeapon,
-    toggleSlotSonata,
+    setSlotSonata,
     clearSlot,
     resetAll,
     importState,

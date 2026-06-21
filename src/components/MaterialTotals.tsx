@@ -69,6 +69,22 @@ export function MaterialTotals({
   const [openId, setOpenId] = useState<number | null>(null);
 
   if (plan.totalItems === 0) {
+    // `controls` present means there ARE built Resonators — the totals are empty only
+    // because they're all toggled off. Keep the toggle bar visible (so they can be
+    // switched back on) and say so, rather than implying nothing has been planned.
+    if (controls) {
+      return (
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-2xl border border-[var(--color-edge)] bg-[var(--color-panel)] px-4 py-3">
+            {controls}
+          </div>
+          <div className="rounded-2xl border border-dashed border-[var(--color-edge)] p-10 text-center text-sm text-slate-500">
+            No materials to farm. Tap a head above to include a Resonator, or set a target
+            above its current level.
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="rounded-2xl border border-dashed border-[var(--color-edge)] p-10 text-center text-sm text-slate-500">
         Add a Resonator or weapon and set a target to see what to farm.

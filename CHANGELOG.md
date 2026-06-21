@@ -12,11 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Endstate Matrix → Sonata sets.** Each resonator slot on a team card now carries a
   Sonata note below its weapon: pick the echo sets that resonator runs. It's a build note
   only — there's no Sonata inventory to track. The slot stays compact, showing just the
-  set emblems until tapped, which opens a multi-select picker (all 31 sets, newest first).
-  Each set shows its activation count — 2pc/5pc, 3pc, or 1pc — and selection is bounded by
-  the real 5-echo budget (so e.g. 5, 3+2, or 2+2+1), dimming sets that no longer fit. Saved
-  plans are migrated in place (the new field defaults to empty), so `wuwa.plan.v1` is
-  unchanged.
+  set emblems (with their piece count) until tapped, which opens a multi-select picker
+  (all 31 sets, newest first). Each set exposes its activation tiers as buttons — a 2/5pc
+  set lets you run it as either a 2-piece or a 5-piece, single-tier sets (3pc, 1pc) just
+  one — and the selection is bounded by the real 5-echo budget (so e.g. 5, 3+2, or 2+2+1),
+  dimming tiers that no longer fit. Saved plans are migrated in place, so `wuwa.plan.v1`
+  is unchanged.
 - **Material Calculator → Planner** — a head-icon toggle bar above the "still to farm"
   plan, one per built Resonator. Each is on by default; tapping a head excludes that
   Resonator's materials from the aggregated totals (and tapping again folds them back

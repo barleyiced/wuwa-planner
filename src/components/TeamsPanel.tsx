@@ -7,6 +7,7 @@ import {
   vigorGroupKey,
   vigorOf,
   type GameData,
+  type SonataPick,
 } from "../game";
 import { CharIcon, SonataIcon, WeaponIcon, WeaponTypeIcon } from "./Icon";
 import { CharacterPicker } from "./CharacterPicker";
@@ -137,7 +138,7 @@ export function TeamsPanel({ data, plan }: { data: GameData; plan: PlanApi }) {
           teamId={editing.teamId}
           slotIndex={editing.slot}
           character={editChar}
-          selected={editSlot?.sonataIds ?? []}
+          selected={editSlot?.sonata ?? []}
           onClose={() => setEditing(null)}
         />
       )}
@@ -257,7 +258,7 @@ function TeamCard({
             plan={plan}
             characterId={slot.characterId}
             weaponId={slot.weaponId}
-            sonataIds={slot.sonataIds}
+            sonata={slot.sonata}
             overVigor={slot.characterId ? overVigorIds.has(slot.characterId) : false}
             onEditChar={() => onEdit(i, "char")}
             onEditWeapon={() => onEdit(i, "weapon")}
@@ -275,7 +276,7 @@ function Slot({
   plan,
   characterId,
   weaponId,
-  sonataIds,
+  sonata,
   overVigor,
   onEditChar,
   onEditWeapon,
@@ -286,7 +287,7 @@ function Slot({
   plan: PlanApi;
   characterId: string | null;
   weaponId: string | null;
-  sonataIds: string[];
+  sonata: SonataPick[];
   overVigor: boolean;
   onEditChar: () => void;
   onEditWeapon: () => void;
@@ -373,20 +374,30 @@ function Slot({
       <button
         onClick={onEditSonata}
         title={
-          sonataIds.length
-            ? sonataIds.map((id) => SONATA_BY_ID[id]?.name).filter(Boolean).join(" · ")
+          sonata.length
+            ? sonata
+                .map((p) => SONATA_BY_ID[p.id] && `${SONATA_BY_ID[p.id].name} (${p.pieces}pc)`)
+                .filter(Boolean)
+                .join(" · ")
             : "Assign Sonata sets"
         }
-        className={`flex w-full items-center justify-center gap-1 rounded-lg border py-1 transition ${
-          sonataIds.length
+        className={`flex w-full items-center justify-center gap-1.5 rounded-lg border py-1 transition ${
+          sonata.length
             ? "border-[var(--color-edge)] hover:bg-white/5"
             : "border-dashed border-[var(--color-edge)] text-slate-500 hover:border-sky-500/60 hover:text-sky-300"
         }`}
       >
-        {sonataIds.length ? (
-          sonataIds.map(
-            (id) =>
-              SONATA_BY_ID[id] && <SonataIcon key={id} sonata={SONATA_BY_ID[id]} className="h-4 w-4" />
+        {sonata.length ? (
+          sonata.map(
+            (p) =>
+              SONATA_BY_ID[p.id] && (
+                <span key={p.id} className="relative inline-flex">
+                  <SonataIcon sonata={SONATA_BY_ID[p.id]} className="h-4 w-4" />
+                  <span className="absolute -bottom-1 -right-1 rounded-full bg-[var(--color-panel)] px-0.5 text-[7px] font-semibold leading-none text-slate-300 ring-1 ring-[var(--color-edge)]">
+                    {p.pieces}
+                  </span>
+                </span>
+              )
           )
         ) : (
           <span className="text-[9px]">+ Sonata</span>
